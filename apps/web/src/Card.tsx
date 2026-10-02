@@ -3,6 +3,7 @@ import { Heart, LockKeyhole, Layers, Sparkles } from 'lucide-react';
 import { cardLabel, type Card as GameCard } from '../../../packages/engine/src/index';
 
 export const ArtContext = createContext<Record<string, string>>({});
+export const PrintedArtContext = createContext<string[]>([]);
 export function artKey(card: GameCard): string {
   return card.kind === 'number' || card.kind === 'bonus' ? `${card.kind}-${card.value}` : card.kind;
 }
@@ -33,9 +34,11 @@ export default function Card({
   back?: boolean;
 }) {
   const art = useContext(ArtContext);
+  const printedFaces = useContext(PrintedArtContext);
   const [failed, setFailed] = useState('');
   const key = back ? 'back' : card ? artKey(card) : '';
   const image = art[key];
+  const fullFace = !!image && failed !== image && printedFaces.includes(key);
   const label = back
     ? 'Mazo de 7 endeas'
     : card?.kind === 'number'
@@ -62,7 +65,7 @@ export default function Card({
   const effect = effects[kind as keyof typeof effects];
   return (
     <div
-      className={`playing-card card-${kind} ${small ? 'card-small' : ''} ${image && failed !== image ? 'has-art' : ''}`}
+      className={`playing-card card-${kind} ${small ? 'card-small' : ''} ${image && failed !== image ? 'has-art' : ''} ${fullFace ? 'full-art' : ''}`}
       style={
         { '--card-hue': card?.kind === 'number' ? hues[card.value] : 40 } as React.CSSProperties
       }

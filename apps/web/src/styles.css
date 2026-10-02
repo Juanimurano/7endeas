@@ -2129,3 +2129,391 @@ small {
     width: 13px;
   }
 }
+
+/* Las cartas importadas ya incluyen título, marco e ilustración. */
+.playing-card.full-art {
+  height: auto;
+  max-height: none;
+  aspect-ratio: 2 / 3;
+  border: 0;
+  background: transparent;
+}
+.full-art .card-art {
+  object-fit: contain;
+}
+.full-art .card-frame {
+  display: none;
+}
+.held-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 8px 0 12px;
+}
+.held-action .playing-card {
+  width: 52px;
+}
+.target-panel > div:first-child {
+  align-items: center;
+}
+.target-panel .playing-card {
+  width: 52px;
+}
+.card-reveal-dialog {
+  --reveal-accent: var(--purple);
+  --reveal-glow: #bea7ff26;
+  width: min(740px, calc(100% - 28px));
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 32px;
+  border: 1px solid var(--accent-border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 100px #00000080;
+  overflow: auto;
+}
+.card-reveal-dialog[open] {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: center;
+  gap: 32px;
+  animation: reveal-appear 220ms ease-out both;
+}
+.card-reveal-dialog::backdrop {
+  background: #07050de6;
+  backdrop-filter: blur(7px);
+}
+.reveal-freeze {
+  --reveal-accent: #9adfe6;
+  --reveal-glow: #83d4de26;
+}
+.reveal-draw3 {
+  --reveal-accent: var(--yellow);
+  --reveal-glow: #f7c95b26;
+}
+.reveal-life {
+  --reveal-accent: var(--orange);
+  --reveal-glow: #f49b7d26;
+}
+.reveal-art {
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  background: radial-gradient(ellipse at center, var(--reveal-glow), transparent 72%);
+  perspective: 1000px;
+}
+.reveal-card {
+  width: 190px;
+  aspect-ratio: 2 / 3;
+  filter: drop-shadow(0 12px 18px #00000066);
+}
+.reveal-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: reveal-flip 700ms cubic-bezier(0.22, 0.7, 0.22, 1) both;
+}
+.reveal-front,
+.reveal-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.reveal-back {
+  transform: rotateY(180deg);
+}
+.reveal-front .playing-card,
+.reveal-back .playing-card {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+.reveal-back .card-value b {
+  font-size: 115px;
+}
+.reveal-copy {
+  min-width: 0;
+}
+.reveal-copy .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--reveal-accent);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.reveal-copy h2 {
+  margin: 14px 0;
+  font-size: 34px;
+  letter-spacing: -1px;
+}
+.reveal-copy > p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.reveal-hint {
+  margin: 20px 0;
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  border-left: 2px solid var(--reveal-accent);
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.reveal-copy .reveal-remaining {
+  font-size: 11px;
+  margin-bottom: 15px;
+}
+@keyframes reveal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes reveal-flip {
+  from {
+    transform: rotateY(180deg) scale(0.88);
+  }
+  to {
+    transform: rotateY(0) scale(1);
+  }
+}
+@media (max-width: 600px) {
+  .card-reveal-dialog {
+    padding: 24px;
+  }
+  .card-reveal-dialog[open] {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .reveal-art {
+    padding: 0;
+  }
+  .reveal-card {
+    width: 146px;
+  }
+  .reveal-copy h2 {
+    font-size: 28px;
+    margin: 10px 0;
+  }
+  .reveal-copy > p {
+    font-size: 13px;
+  }
+  .reveal-hint {
+    margin: 14px 0;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  .card-reveal-dialog {
+    padding: 22px;
+  }
+  .card-reveal-dialog[open] {
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 22px;
+  }
+  .reveal-card {
+    width: 130px;
+  }
+  .reveal-copy h2 {
+    font-size: 26px;
+    margin: 10px 0;
+  }
+  .reveal-hint {
+    margin: 12px 0;
+  }
+}
+
+/* Celebración del resultado final, compartida por todos los jugadores. */
+.victory-dialog {
+  width: min(540px, calc(100% - 28px));
+  max-height: calc(100dvh - 28px);
+  padding: 34px;
+  margin: auto;
+  border: 1px solid #ad8c4d;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at top, #f7c95b12, transparent 65%), var(--surface);
+  color: var(--ink);
+  text-align: center;
+  overflow: auto;
+  box-shadow: 0 25px 100px #00000088;
+}
+.victory-dialog[open] {
+  animation: victory-appear 350ms ease-out both;
+}
+.victory-dialog::backdrop {
+  background: radial-gradient(ellipse at center, #f7c95b0d, transparent 65%), #07050de6;
+  backdrop-filter: blur(7px);
+}
+.victory-content {
+  position: relative;
+  z-index: 1;
+}
+.victory-trophy {
+  display: grid;
+  place-items: center;
+  width: 136px;
+  height: 126px;
+  margin: 0 auto 16px;
+  position: relative;
+  color: var(--yellow);
+  background: radial-gradient(circle, #f7c95b20, transparent 70%);
+}
+.victory-cup {
+  width: 84px;
+  height: 84px;
+  filter: drop-shadow(0 4px 12px #f7c95b26);
+  animation: victory-trophy 750ms cubic-bezier(0.2, 0.7, 0.25, 1.2) both;
+}
+.victory-spark {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+}
+.victory-spark.left {
+  left: 0;
+  top: 23px;
+}
+.victory-spark.right {
+  right: 0;
+  bottom: 23px;
+}
+.victory-content > .eyebrow {
+  color: var(--yellow);
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
+.victory-name {
+  display: block;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.12;
+  letter-spacing: -1.6px;
+  margin: 18px 0 9px;
+  overflow-wrap: anywhere;
+}
+.victory-subtitle {
+  display: block;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+.victory-content > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 13px;
+}
+.victory-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px 0 9px;
+  padding: 15px;
+  background: var(--warm-surface);
+  border: 1px solid var(--warm-border);
+  border-radius: 10px;
+  color: var(--yellow);
+}
+.victory-score strong {
+  font-family: 'Space Grotesk';
+  font-size: 40px;
+  line-height: 1;
+}
+.victory-score span {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.victory-rounds {
+  margin-bottom: 23px;
+}
+.victory-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.victory-confetti span {
+  position: absolute;
+  top: -20px;
+  width: 7px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  background: var(--confetti-color);
+  animation: victory-confetti var(--confetti-duration) var(--confetti-delay) ease-in both;
+}
+.victory-confetti span:nth-child(3n) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+@keyframes victory-appear {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes victory-trophy {
+  from {
+    opacity: 0;
+    transform: translateY(22px) rotate(-12deg) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+@keyframes victory-confetti {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0) rotate(0);
+  }
+  12% {
+    opacity: 0.9;
+  }
+  82% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--confetti-drift), 700px, 0) rotate(480deg);
+  }
+}
+@media (max-width: 520px) {
+  .victory-dialog {
+    padding: 26px 22px;
+  }
+  .victory-trophy {
+    width: 115px;
+    height: 104px;
+    margin-bottom: 10px;
+  }
+  .victory-cup {
+    width: 70px;
+    height: 70px;
+  }
+  .victory-content > .eyebrow {
+    font-size: 8px;
+  }
+  .victory-subtitle {
+    font-size: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .victory-confetti {
+    display: none;
+  }
+}

@@ -1,6 +1,11 @@
 {
   "generator": "GPT Images",
   "theme": "7 endeas",
-  "status": "pending",
-  "assets": {}
+  "status": "partial",
+  "assets": {
+    "draw3": "/cards/draw3.webp",
+    "life": "/cards/life.webp",
+    "freeze": "/cards/freeze.webp"
+  },
+  "printedFaces": ["draw3", "life", "freeze"]
 }

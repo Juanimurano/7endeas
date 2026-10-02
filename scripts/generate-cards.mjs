@@ -115,6 +115,8 @@ for (const card of selected) {
     ),
   );
   manifest.assets[card.id] = `/cards/${card.id}.webp`;
+  // El generador produce fondos sin texto; los artes importados pueden ser caras completas.
+  manifest.printedFaces = (manifest.printedFaces ?? []).filter((id) => id !== card.id);
   manifest.generator = 'GPT Images';
   manifest.theme = '7 endeas';
   manifest.model = model;

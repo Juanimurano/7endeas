@@ -50,6 +50,12 @@ afterEach(async () => {
 });
 
 describe('Salas Socket.IO', () => {
+  it('cierra el servidor aunque haya clientes WebSocket conectados', async () => {
+    const client = await connect();
+    await create(client);
+    await server.app.close();
+    await expect.poll(() => client.connected).toBe(false);
+  });
   it('crea una sala, incorpora invitados y transmite vistas sin secretos', async () => {
     const host = await connect();
     const session = await create(host);

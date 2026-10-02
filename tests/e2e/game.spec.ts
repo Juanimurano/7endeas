@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { dismissReveals } from './helpers';
 
 test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -19,10 +20,14 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
   await expect(page.locator('.game-page')).toBeVisible();
   await expect
     .poll(
-      async () =>
-        (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) ||
-        (await page.locator('.target-buttons button').first().isVisible()) ||
-        (await page.getByRole('button', { name: 'Siguiente ronda' }).isVisible()),
+      async () => {
+        await dismissReveals(page);
+        return (
+          (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) ||
+          (await page.locator('.target-buttons button').first().isVisible()) ||
+          (await page.getByRole('button', { name: 'Siguiente ronda' }).isVisible())
+        );
+      },
       { timeout: 20000 },
     )
     .toBe(true);
@@ -31,6 +36,7 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
   }
   // El primer robo puede ser una acción: elegimos un objetivo si corresponde.
   for (let i = 0; i < 30; i++) {
+    await dismissReveals(page);
     const target = page.locator('.target-buttons button').first();
     if (await target.isVisible()) await target.click();
     if (await page.getByRole('button', { name: 'Siguiente ronda' }).isVisible()) break;
@@ -41,6 +47,7 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
   await expect(page.getByRole('button', { name: 'Siguiente ronda' })).toBeVisible({
     timeout: 15000,
   });
+  await dismissReveals(page);
   await page.screenshot({ path: `test-results/game-${testInfo.project.name}.png`, fullPage: true });
   await expect(page.locator('body')).toHaveJSProperty(
     'scrollWidth',

@@ -59,6 +59,7 @@ export async function createServer(
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16384 });
   const io = new Server<ClientEvents, ServerEvents>(app.server, { maxHttpBufferSize: 16384 });
   const rooms = new Map<string, Room>();
+  let closing = false;
   const bindings = new Map<string, { room: Room; seat: InternalSeat }>();
   const grace = options.reconnectGrace ?? 45000;
   const delay = options.botDelay ?? 1100;
@@ -67,6 +68,7 @@ export async function createServer(
   app.get('/health', async () => ({ ok: true, rooms: rooms.size }));
 
   function broadcast(room: Room) {
+    if (closing) return;
     room.touched = Date.now();
     if (room.game)
       for (const p of room.game.players)
@@ -305,9 +307,14 @@ export async function createServer(
     }
   }, 60000);
   cleanup.unref();
-  app.addHook('onClose', async () => {
+  app.addHook('preClose', async () => {
+    closing = true;
     clearInterval(cleanup);
     for (const room of rooms.values()) if (room.timer) clearTimeout(room.timer);
+    // Liberar WebSockets antes de que Fastify espere el cierre del servidor HTTP.
+    io.disconnectSockets(true);
+  });
+  app.addHook('onClose', async () => {
     io.close();
   });
   return { app, io, rooms };

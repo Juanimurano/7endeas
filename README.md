@@ -41,35 +41,51 @@ El servidor corre en `8086`; Vite en `5186`, con proxy de `/socket.io`. Para pro
 - Mazo de **94 cartas**: 79 números, 6 mejoras y 9 acciones.
 - Pedir carta o plantarse, números repetidos y puntuación por ronda.
 - **No endeas**, **Endeá tres** con acciones demoradas y encadenadas, **Otra endea** y transferencia de una segunda vida.
+- Arte de las tres cartas especiales y revelación animada con su efecto al recibirlas, incluso por regalo o acción de otro jugador. Los avisos se encolan durante robos múltiples y respetan movimiento reducido.
 - **¡7 endeas!**: 7 números distintos, incluyendo el 0, cierre inmediato y bonus de 15.
 - El ×2 duplica solamente la suma de los números.
 - Descartes por ronda, reciclado del mazo y rotación del repartidor.
 - Victoria al terminar una ronda con al menos 200 puntos; desempate jugando otra ronda con todos.
+- Celebración de victoria para toda la mesa, con trofeo animado, confeti, nombre y puntuación del ganador. Espera a que se cierren los avisos de cartas especiales y respeta movimiento reducido.
 - Bots automáticos, ranking y registro de acciones.
 - Reconexión con token de sesión guardado por pestaña, con respaldo en el navegador para recuperar el asiento si el teléfono descarta la pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
 - Interfaz responsive, navegación por teclado y reglas dentro de la app.
 
+## Arte de las cartas especiales
+
+Las tres imágenes aportadas están en `apps/web/public/cards/`, con originales PNG y versiones WebP optimizadas. El manifiesto las registra como caras completas (`printedFaces`), de modo que no se superponen títulos ni íconos sobre el texto de las imágenes.
+
+Si reemplazás los originales `draw3.png`, `life.png` y `freeze.png`, ejecutá:
+
+```bash
+npm run import:cards
+```
+
+Cada jugador recibe un aviso con la carta, su efecto y un botón **Entendido**. Las vidas quedan visibles junto a la mano; las acciones pendientes se muestran junto a la selección del objetivo. Al reconectar se evita reproducir avisos antiguos; una elección todavía pendiente sí se recuerda.
 
 ## Comandos
 
-| Comando                  | Función                                            |
-| ------------------------ | -------------------------------------------------- |
-| `npm run dev`            | Servidor y web en desarrollo                       |
-| `npm run dev:server`     | Solo servidor con recarga                          |
-| `npm run dev:web`        | Solo Vite, accesible en LAN                        |
-| `npm run typecheck`      | Validación TypeScript                              |
-| `npm test`               | Reglas, simulaciones y salas Socket.IO             |
-| `npm run test:e2e`       | Flujos desktop/móvil en Chromium                   |
-| `npm run build`          | Compila web y servidor                             |
-| `npm start`              | Sirve el build completo en `http://localhost:8086` |
-| `npm run generate:cards` | Genera imágenes con GPT Images                     |
-| `npm run format`         | Formatea el código                                 |
+| Comando                  | Función                                             |
+| ------------------------ | --------------------------------------------------- |
+| `npm run dev`            | Servidor y web en desarrollo                        |
+| `npm run dev:server`     | Solo servidor con recarga                           |
+| `npm run dev:web`        | Solo Vite, accesible en LAN                         |
+| `npm run typecheck`      | Validación TypeScript                               |
+| `npm test`               | Reglas, simulaciones y salas Socket.IO              |
+| `npm run test:e2e`       | Flujos desktop/móvil en Chromium                    |
+| `npm run build`          | Compila web y servidor                              |
+| `npm start`              | Sirve el build completo en `http://localhost:8086`  |
+| `npm run generate:cards` | Genera imágenes con GPT Images                      |
+| `npm run import:cards`   | Optimiza e incorpora las tres cartas especiales PNG |
+| `npm run format`         | Formatea el código                                  |
 
 Antes de la primera ejecución de los tests de navegador:
 
 ```bash
 npx playwright install chromium
 ```
+
+Ejecutá `npm run build` antes de `npm run test:e2e`: las pruebas de cartas especiales usan el frontend compilado con un servidor aislado y mazos controlados, sin endpoints de prueba en producción.
 
 Los tests también se pueden ejecutar contra el build de producción (después de `npm run build`). En PowerShell:
 

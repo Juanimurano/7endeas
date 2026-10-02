@@ -29,7 +29,11 @@ import {
   type GameView,
 } from '../../../packages/engine/src/index';
 import type { RoomView } from '../../../packages/protocol/src/index';
-import Card, { ArtContext } from './Card';
+import Card, { ArtContext, PrintedArtContext } from './Card';
+import CardRevealDialog from './CardRevealDialog';
+import { useSpecialCardReveals } from './useSpecialCardReveals';
+import WinnerCelebration from './WinnerCelebration';
+import { useWinnerCelebration } from './useWinnerCelebration';
 import { useGame } from './useGame';
 
 type Connection = ReturnType<typeof useGame>;
@@ -537,11 +541,20 @@ function PlayerHand({
         </div>
       </div>
       <div className="modifier-row">
-        {mods.map((card) => (
-          <span key={card.id} className={`modifier modifier-${card.kind}`}>
-            {card.kind === 'life' && <Heart size={13} />} {cardLabel(card)}
-          </span>
-        ))}
+        {mods.map((card) =>
+          card.kind === 'life' ? (
+            <div key={card.id} className="held-action">
+              <Card card={card} small />
+              <span className="modifier modifier-life">
+                <Heart size={13} /> {cardLabel(card)}
+              </span>
+            </div>
+          ) : (
+            <span key={card.id} className={`modifier modifier-${card.kind}`}>
+              {cardLabel(card)}
+            </span>
+          ),
+        )}
       </div>
       <div className="number-row">
         {numbers.length ? (
@@ -656,15 +669,7 @@ function Game({ connection }: { connection: Connection }) {
           {pending && (
             <section className="target-panel">
               <div>
-                <span className="target-icon">
-                  {pending.kind === 'freeze' ? (
-                    <LockKeyhole />
-                  ) : pending.kind === 'life' ? (
-                    <Heart />
-                  ) : (
-                    <Layers />
-                  )}
-                </span>
+                <Card card={pending.card} small />
                 <div>
                   <h3>{cardLabel(pending.card)}</h3>
                   <p>
@@ -807,7 +812,13 @@ export default function App() {
   const connection = useGame();
   const [rules, setRules] = useState(false);
   const [art, setArt] = useState<Record<string, string>>({});
+  const [printedFaces, setPrintedFaces] = useState<string[]>([]);
+  const { reveal, count, dismiss } = useSpecialCardReveals(
+    connection.room,
+    connection.session?.playerId,
+  );
   const { room, connected, error, busy } = connection;
+  const { victory, dismiss: dismissVictory } = useWinnerCelebration(room);
   useEffect(() => {
     const controller = new AbortController();
     fetch('/cards/manifest.json', { signal: controller.signal })
@@ -818,80 +829,103 @@ export default function App() {
           if (typeof value === 'string' && value.startsWith('/cards/')) assets[key] = value;
         }
         setArt(assets);
+        setPrintedFaces(
+          Array.isArray(data.printedFaces)
+            ? data.printedFaces.filter((key: unknown) => typeof key === 'string' && !!assets[key])
+            : [],
+        );
       })
       .catch(() => {});
     return () => controller.abort();
   }, []);
   return (
     <ArtContext.Provider value={art}>
-      <div className="site-shell">
-        <header className="site-header">
-          <Brand />
-          <div className="header-actions">
-            <span className={`connection-status ${connected ? 'connected' : ''}`}>
-              {connected ? (
-                <>
-                  <span className="live-dot" /> Listo para jugar
-                </>
-              ) : (
-                <>
-                  <WifiOff size={14} /> Conectando…
-                </>
+      <PrintedArtContext.Provider value={printedFaces}>
+        <div className="site-shell">
+          <header className="site-header">
+            <Brand />
+            <div className="header-actions">
+              <span className={`connection-status ${connected ? 'connected' : ''}`}>
+                {connected ? (
+                  <>
+                    <span className="live-dot" /> Listo para jugar
+                  </>
+                ) : (
+                  <>
+                    <WifiOff size={14} /> Conectando…
+                  </>
+                )}
+              </span>
+              <button className="button text-button" onClick={() => setRules(true)}>
+                <HelpCircle size={18} /> Cómo jugar
+              </button>
+              {room && (
+                <button
+                  className="icon-button"
+                  aria-label="Salir de la sala"
+                  title="Salir de la sala"
+                  disabled={busy || !connected}
+                  onClick={() => void connection.leave()}
+                >
+                  <LogOut size={19} />
+                </button>
               )}
-            </span>
-            <button className="button text-button" onClick={() => setRules(true)}>
-              <HelpCircle size={18} /> Cómo jugar
-            </button>
-            {room && (
+            </div>
+          </header>
+          {!connected && room && (
+            <div className="connection-banner" role="status">
+              <WifiOff size={18} /> Se perdió la conexión. Intentando recuperar tu partida…
+            </div>
+          )}
+          {error && (
+            <div className="error-banner" role="alert">
+              <span>{error}</span>
               <button
                 className="icon-button"
-                aria-label="Salir de la sala"
-                title="Salir de la sala"
-                disabled={busy || !connected}
-                onClick={() => void connection.leave()}
+                onClick={() => connection.setError('')}
+                aria-label="Cerrar mensaje"
               >
-                <LogOut size={19} />
+                <X size={18} />
               </button>
-            )}
-          </div>
-        </header>
-        {!connected && room && (
-          <div className="connection-banner" role="status">
-            <WifiOff size={18} /> Se perdió la conexión. Intentando recuperar tu partida…
-          </div>
-        )}
-        {error && (
-          <div className="error-banner" role="alert">
-            <span>{error}</span>
-            <button
-              className="icon-button"
-              onClick={() => connection.setError('')}
-              aria-label="Cerrar mensaje"
-            >
-              <X size={18} />
-            </button>
-          </div>
-        )}
-        {room ? (
-          room.game ? (
-            <Game connection={connection} />
+            </div>
+          )}
+          {room ? (
+            room.game ? (
+              <Game connection={connection} />
+            ) : (
+              <Lobby connection={connection} />
+            )
           ) : (
-            <Lobby connection={connection} />
-          )
-        ) : (
-          <Home connection={connection} />
+            <Home connection={connection} />
+          )}
+          <footer className="site-footer">
+            <span>HECHO PARA COMPARTIR UNA BUENA ENDEA.</span>
+            <span>
+              {Object.keys(art).length
+                ? 'Arte generado con GPT Images'
+                : 'Arte provisional · GPT Images pendiente'}
+              <span className="footer-separator">/</span>Versión 0.1
+            </span>
+          </footer>
+        </div>
+        {rules && <Rules close={() => setRules(false)} />}
+        {reveal && (
+          <CardRevealDialog
+            key={`${room?.code}-${reveal.event.id}`}
+            reveal={reveal}
+            count={count}
+            onDismiss={dismiss}
+          />
         )}
-        <footer className="site-footer">
-          <span>HECHO PARA COMPARTIR UNA BUENA ENDEA.</span>
-          <span>
-            {Object.keys(art).length
-              ? 'Arte generado con GPT Images'
-              : 'Arte provisional · GPT Images pendiente'}
-            <span className="footer-separator">/</span>Versión 0.1
-          </span>
-        </footer>
-      </div>
-      {rules && <Rules close={() => setRules(false)} />}
+        {victory && !reveal && !rules && (
+          <WinnerCelebration
+            key={victory.key}
+            victory={victory}
+            mine={victory.playerId === connection.session?.playerId}
+            onDismiss={dismissVictory}
+          />
+        )}
+      </PrintedArtContext.Provider>
     </ArtContext.Provider>
   );
 }

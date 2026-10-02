@@ -14,6 +14,15 @@ export interface Player {
   cards: Card[];
 }
 type ActionCard = Extract<Card, { kind: 'double' | 'freeze' | 'draw3' | 'life' }>;
+export type SpecialCard = { id: string; kind: 'freeze' | 'draw3' | 'life' };
+export interface SpecialCardEvent {
+  id: number;
+  round: number;
+  playerId: string;
+  card: SpecialCard;
+  reason: 'draw' | 'gift' | 'effect';
+  outcome: 'pending' | 'held' | 'used' | 'gifted' | 'discarded' | 'played' | 'cancelled';
+}
 type Task =
   | { type: 'draw'; playerId: string; remaining: number; deferred: ActionCard[] }
   | { type: 'effect'; playerId: string; card: ActionCard };
@@ -39,6 +48,7 @@ export interface GameState {
   targetScore: number;
   log: { id: number; text: string }[];
   sequence: number;
+  cardEvents: SpecialCardEvent[];
 }
 export type GameAction =
   { type: 'hit' | 'stand' | 'nextRound' } | { type: 'target'; targetId: string };
@@ -122,6 +132,7 @@ export function createGame(
     targetScore: 200,
     log: [],
     sequence: 0,
+    cardEvents: [],
   };
   note(state, '¡Empieza la partida! La meta son 200 puntos.');
   advanceTurn(state, dealerIndex);
@@ -132,9 +143,15 @@ function finishRound(state: GameState) {
   if (state.phase !== 'playing') return;
   state.turnId = null;
   // Las acciones pendientes también son cartas usadas, incluso si un Flip 7 interrumpe la cadena.
-  for (const task of state.tasks)
-    state.roundDiscard.push(...(task.type === 'effect' ? [task.card] : task.deferred));
-  if (state.pending) state.roundDiscard.push(state.pending.card);
+  for (const task of state.tasks) {
+    const cards = task.type === 'effect' ? [task.card] : task.deferred;
+    for (const card of cards) setCardOutcome(state, card, 'cancelled');
+    state.roundDiscard.push(...cards);
+  }
+  if (state.pending) {
+    setCardOutcome(state, state.pending.card, 'cancelled');
+    state.roundDiscard.push(state.pending.card);
+  }
   state.tasks = [];
   state.pending = null;
   for (const player of state.players) {
@@ -189,12 +206,38 @@ export function cardLabel(card: Card): string {
   return { double: '×2', freeze: 'No endeas', draw3: 'Endeá tres', life: 'Otra endea' }[card.kind];
 }
 
+function recordCardEvent(
+  state: GameState,
+  player: Player,
+  card: Card,
+  reason: SpecialCardEvent['reason'],
+) {
+  if (card.kind !== 'freeze' && card.kind !== 'draw3' && card.kind !== 'life') return;
+  state.cardEvents.push({
+    id: state.sequence,
+    round: state.round,
+    playerId: player.id,
+    card: { id: card.id, kind: card.kind },
+    reason,
+    outcome: reason === 'effect' ? 'played' : card.kind === 'life' ? 'held' : 'pending',
+  });
+  state.cardEvents = state.cardEvents.slice(-60);
+}
+
+function setCardOutcome(state: GameState, card: Card, outcome: SpecialCardEvent['outcome']) {
+  for (const event of state.cardEvents) {
+    if (event.card.id === card.id && event.round === state.round && event.reason !== 'effect')
+      event.outcome = outcome;
+  }
+}
+
 function setEffect(state: GameState, actor: Player, card: ActionCard) {
   const eligible = state.players.filter(
     (p) =>
       p.status === 'active' && (card.kind !== 'life' || !p.cards.some((c) => c.kind === 'life')),
   );
   if (!eligible.length) {
+    setCardOutcome(state, card, card.kind === 'life' ? 'discarded' : 'cancelled');
     state.roundDiscard.push(card);
     return;
   }
@@ -204,6 +247,7 @@ function setEffect(state: GameState, actor: Player, card: ActionCard) {
     card,
     eligibleIds: eligible.map((p) => p.id),
   };
+  setCardOutcome(state, card, 'pending');
 }
 
 function receive(
@@ -213,10 +257,12 @@ function receive(
   batch: Extract<Task, { type: 'draw' }>,
 ) {
   note(state, `${player.name} saca ${cardLabel(card)}.`);
+  recordCardEvent(state, player, card, 'draw');
   if (card.kind === 'number') {
     if (player.cards.some((c) => c.kind === 'number' && c.value === card.value)) {
       const life = player.cards.findIndex((c) => c.kind === 'life');
       if (life >= 0) {
+        setCardOutcome(state, player.cards[life], 'used');
         state.roundDiscard.push(...player.cards.splice(life, 1), card);
         note(state, `${player.name} usa Otra endea: descarta el repetido y sigue en la ronda.`);
       } else {
@@ -256,7 +302,10 @@ function processTasks(state: GameState, rng: () => number) {
         state.tasks.unshift(
           ...task.deferred.map((card) => ({ type: 'effect' as const, playerId: player.id, card })),
         );
-      else state.roundDiscard.push(...task.deferred);
+      else {
+        for (const card of task.deferred) setCardOutcome(state, card, 'cancelled');
+        state.roundDiscard.push(...task.deferred);
+      }
       continue;
     }
     task.remaining--;
@@ -282,6 +331,7 @@ export function dispatch(
     if (state.phase !== 'roundEnd') throw new Error('La ronda todavía no terminó.');
     state.discard.push(...state.roundDiscard, ...state.players.flatMap((p) => p.cards));
     state.roundDiscard = [];
+    state.cardEvents = [];
     state.round++;
     state.dealerIndex = (state.dealerIndex + 1) % state.players.length;
     state.flipSevenId = null;
@@ -305,15 +355,20 @@ export function dispatch(
     const target = playerById(state, action.targetId);
     state.pending = null;
     if (pending.kind === 'life') {
+      setCardOutcome(state, pending.card, 'gifted');
       target.cards.push(pending.card);
       note(state, `${actor.name} regala Otra endea a ${target.name}: una vida extra.`);
+      recordCardEvent(state, target, pending.card, 'gift');
     } else {
+      setCardOutcome(state, pending.card, 'played');
       state.roundDiscard.push(pending.card);
       if (pending.kind === 'freeze') {
         target.status = 'frozen';
         note(state, `${actor.name} juega No endeas contra ${target.name}, que asegura sus puntos.`);
+        if (target.id !== actor.id) recordCardEvent(state, target, pending.card, 'effect');
       } else {
         note(state, `${actor.name} juega Endeá tres: ${target.name} debe sacar tres cartas.`);
+        if (target.id !== actor.id) recordCardEvent(state, target, pending.card, 'effect');
         state.tasks.unshift({ type: 'draw', playerId: target.id, remaining: 3, deferred: [] });
       }
     }
