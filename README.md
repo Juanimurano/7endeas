@@ -1,0 +1,122 @@
+# Flip Siete
+
+Versión web multijugador de Flip 7, basada en el reglamento de `docs/Flip-7.pdf`. Interfaz en español rioplatense, salas por código, partidas en tiempo real y bots para probar sin esperar a otros jugadores.
+
+## Arrancar
+
+Requiere **Node.js 22 o superior** y npm.
+
+```bash
+npm install
+npm run dev
+```
+
+Abrí **http://localhost:5173**. Podés:
+
+- Escribir tu nombre y elegir **Jugar con 2 bots** para probar directamente.
+- Crear una sala y compartir su código de 5 caracteres o el enlace **Invitar**.
+- Entrar desde otro navegador o pestaña, agregar bots en el lobby y empezar la partida.
+- Jugar solo: el lobby permite empezar con una persona.
+
+El servidor corre en `3001`; Vite en `5173`, con proxy de `/socket.io`. Para probar desde el teléfono en la misma red, usá `http://IP-DE-TU-PC:5173` y permití el acceso de Node en el firewall si es necesario. El enlace de invitación usa la dirección desde la que abriste la web.
+
+## Qué incluye la base
+
+- React **18**, Vite, TypeScript, Fastify y Socket.IO.
+- Salas privadas de 1 a 12 jugadores y anfitrión con control del lobby.
+- Mazo de **94 cartas**: 79 números, 6 mejoras y 9 acciones.
+- Pedir carta o plantarse, números repetidos y puntuación por ronda.
+- **Bloqueo**, **Saca tres** con acciones demoradas y encadenadas, **Vida extra** y transferencia de una segunda vida.
+- **Flip 7**: 7 números distintos, incluyendo el 0, cierre inmediato y bonus de 15.
+- El ×2 duplica solamente la suma de los números.
+- Descartes por ronda, reciclado del mazo y rotación del repartidor.
+- Victoria al terminar una ronda con al menos 200 puntos; desempate jugando otra ronda con todos.
+- Bots automáticos, ranking y registro de acciones.
+- Reconexión con token de sesión guardado por pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
+- Interfaz responsive, navegación por teclado y reglas dentro de la app.
+
+## Imágenes con GPT Images
+
+**Las imágenes GPT todavía no están generadas:** no había una clave de OpenAI disponible al crear esta versión. La web muestra cartas HTML/CSS provisionales y lo indica en el pie. El generador ya está integrado y la interfaz reemplaza automáticamente ese fondo cuando encuentra los assets.
+
+1. Creá un archivo `.env` en la raíz tomando `.env.example` como referencia.
+2. Configurá `OPENAI_API_KEY`. La clave se usa exclusivamente en un script local, nunca en React ni en el navegador.
+3. Ejecutá:
+
+```bash
+npm run generate:cards
+```
+
+Se generan **23 imágenes originales** con GPT Images: 13 números, 5 mejoras de suma, ×2, las 3 acciones y el reverso. El modelo predeterminado es `gpt-image-1`; se puede configurar con `OPENAI_IMAGE_MODEL`. Usa tamaño `1024x1536`, calidad `medium` y salida WebP. El comando hace una solicitud paga por cada imagen nueva, usando la cuenta asociada a la clave.
+
+Para probar con una sola carta:
+
+```bash
+npm run generate:cards -- --only life
+```
+
+El script omite imágenes existentes, así que se puede reejecutar para continuar una generación interrumpida. Para regenerar una carta:
+
+```bash
+npm run generate:cards -- --only life --force
+```
+
+Los fondos no incluyen texto: números y etiquetas se dibujan en HTML para conservar legibilidad. Cada imagen guarda su prompt, modelo y fecha en un JSON. Los assets y su manifiesto viven en `apps/web/public/cards/`. Recargá la página después de generarlos; si estás usando el build de producción, volvé a compilar.
+
+## Comandos
+
+| Comando                  | Función                                            |
+| ------------------------ | -------------------------------------------------- |
+| `npm run dev`            | Servidor y web en desarrollo                       |
+| `npm run dev:server`     | Solo servidor con recarga                          |
+| `npm run dev:web`        | Solo Vite, accesible en LAN                        |
+| `npm run typecheck`      | Validación TypeScript                              |
+| `npm test`               | Reglas, simulaciones y salas Socket.IO             |
+| `npm run test:e2e`       | Flujos desktop/móvil en Chromium                   |
+| `npm run build`          | Compila web y servidor                             |
+| `npm start`              | Sirve el build completo en `http://localhost:3001` |
+| `npm run generate:cards` | Genera imágenes con GPT Images                     |
+| `npm run format`         | Formatea el código                                 |
+
+Antes de la primera ejecución de los tests de navegador:
+
+```bash
+npx playwright install chromium
+```
+
+Los tests también se pueden ejecutar contra el build de producción (después de `npm run build`). En PowerShell:
+
+```powershell
+$env:E2E_PRODUCTION = "1"
+npm run test:e2e
+```
+
+## Estructura
+
+```text
+apps/
+  server/src/          Fastify, Socket.IO, salas, sesiones y turnos de bots
+  web/src/             React, pantallas, cartas y estilos
+  web/public/cards/    Imágenes GPT y manifiesto
+packages/
+  engine/src/          Reglas aisladas, dispatch, puntuación y bot
+  protocol/src/        Tipos compartidos de eventos y respuestas
+scripts/
+  generate-cards.mjs   Generador local de arte con GPT Images
+tests/
+  engine.test.ts       Casos de reglas y simulaciones de partidas
+  socket.test.ts       Integración servidor/clientes reales
+  e2e/                 Navegadores y responsive
+docs/
+  Flip-7.pdf           Reglamento aportado
+```
+
+Arquitectura inspirada en [endeasExplosivas](https://codeberg.org/saresq/endeasExplosivas): motor separado, servidor autoritativo, protocolo compartido y frontend React/Vite. Esta implementación se escribió para este proyecto.
+
+El navegador envía intenciones; el servidor identifica al jugador, valida el turno y aplica las reglas. La vista pública excluye el orden del mazo y los tokens. Como las cartas se juegan boca arriba, las manos de la ronda son visibles para todos; las manos de jugadores que se plantaron permanecen visibles en esta adaptación para facilitar el seguimiento.
+
+## Alcance de esta versión
+
+Las salas viven en memoria: reiniciar el servidor las borra. Se limpia una sala tras 30 minutos sin actividad y sin humanos conectados. No hay cuentas ni base de datos. Los jugadores nuevos entran antes de empezar; un jugador existente puede reconectar durante la partida. La variante de desafío individual/en pareja de llegar a 200 antes de 5 rondas todavía no tiene un modo separado.
+
+Proyecto fan: reglas y nombre del juego original pertenecen a sus respectivos autores y titulares. El arte generado es original para esta adaptación.
