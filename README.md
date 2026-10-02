@@ -47,7 +47,7 @@ El servidor corre en `3001`; Vite en `5173`, con proxy de `/socket.io`. Para pro
 - Victoria al terminar una ronda con al menos 200 puntos; desempate jugando otra ronda con todos.
 - Bots automáticos, ranking y registro de acciones.
 - Reconexión con token de sesión guardado por pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
-- Interfaz responsive, navegación por teclado y reglas dentro de la app.
+- Tema oscuro por defecto, interfaz responsive, navegación por teclado y reglas dentro de la app.
 
 ## Imágenes con GPT Images
 
