@@ -49,33 +49,6 @@ El servidor corre en `8086`; Vite en `5186`, con proxy de `/socket.io`. Para pro
 - Reconexión con token de sesión guardado por pestaña, con respaldo en el navegador para recuperar el asiento si el teléfono descarta la pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
 - Interfaz responsive, navegación por teclado y reglas dentro de la app.
 
-## Imágenes con GPT Images
-
-**Las imágenes GPT todavía no están generadas:** no había una clave de OpenAI disponible al crear esta versión. La web muestra cartas HTML/CSS provisionales y lo indica en el pie. El generador ya está integrado y la interfaz reemplaza automáticamente ese fondo cuando encuentra los assets.
-
-1. Creá un archivo `.env` en la raíz tomando `.env.example` como referencia.
-2. Configurá `OPENAI_API_KEY`. La clave se usa exclusivamente en un script local, nunca en React ni en el navegador.
-3. Ejecutá:
-
-```bash
-npm run generate:cards
-```
-
-Se generan **23 imágenes originales** con GPT Images: 13 números, 5 mejoras de suma, ×2, las 3 acciones y el reverso. El modelo predeterminado es `gpt-image-1`; se puede configurar con `OPENAI_IMAGE_MODEL`. Usa tamaño `1024x1536`, calidad `medium` y salida WebP. El comando hace una solicitud paga por cada imagen nueva, usando la cuenta asociada a la clave.
-
-Para probar con una sola carta:
-
-```bash
-npm run generate:cards -- --only life
-```
-
-El script omite imágenes existentes, así que se puede reejecutar para continuar una generación interrumpida. Para regenerar una carta:
-
-```bash
-npm run generate:cards -- --only life --force
-```
-
-Los fondos no incluyen texto: números y etiquetas se dibujan en HTML para conservar legibilidad. Cada imagen guarda su prompt, modelo y fecha en un JSON. Los assets y su manifiesto viven en `apps/web/public/cards/`. Recargá la página después de generarlos; si estás usando el build de producción, volvé a compilar.
 
 ## Comandos
 
