@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const production = process.env.E2E_PRODUCTION === '1';
-const baseURL = production ? 'http://127.0.0.1:3001' : 'http://127.0.0.1:5173';
+const baseURL = production ? 'http://127.0.0.1:8086' : 'http://127.0.0.1:5186';
 
 export default defineConfig({
   testDir: 'tests/e2e',

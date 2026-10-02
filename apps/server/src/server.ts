@@ -49,15 +49,20 @@ const BOT_NAMES = [
 ];
 
 export async function createServer(
-  options: { staticRoot?: string; botDelay?: number; reconnectGrace?: number } = {},
+  options: {
+    staticRoot?: string;
+    botDelay?: number;
+    reconnectGrace?: number;
+    logger?: boolean;
+  } = {},
 ) {
-  const app = Fastify({ logger: false, bodyLimit: 16384 });
+  const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16384 });
   const io = new Server<ClientEvents, ServerEvents>(app.server, { maxHttpBufferSize: 16384 });
   const rooms = new Map<string, Room>();
   const bindings = new Map<string, { room: Room; seat: InternalSeat }>();
   const grace = options.reconnectGrace ?? 45000;
   const delay = options.botDelay ?? 1100;
-  const root = options.staticRoot ?? resolve('dist/web');
+  const root = options.staticRoot ?? resolve(process.env.WEB_DIST_DIR ?? 'dist/web');
   if (existsSync(root)) await app.register(fastifyStatic, { root, prefix: '/' });
   app.get('/health', async () => ({ ok: true, rooms: rooms.size }));
 

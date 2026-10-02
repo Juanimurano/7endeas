@@ -25,14 +25,14 @@ npm install
 npm run dev
 ```
 
-Abrí **http://localhost:5173**. Podés:
+Abrí **http://localhost:5186**. Podés:
 
 - Escribir tu nombre y elegir **Jugar con 2 bots** para probar directamente.
 - Crear una sala y compartir su código de 5 caracteres o el enlace **Invitar**.
 - Entrar desde otro navegador o pestaña, agregar bots en el lobby y empezar la partida.
 - Jugar solo: el lobby permite empezar con una persona.
 
-El servidor corre en `3001`; Vite en `5173`, con proxy de `/socket.io`. Para probar desde el teléfono en la misma red, usá `http://IP-DE-TU-PC:5173` y permití el acceso de Node en el firewall si es necesario. El enlace de invitación usa la dirección desde la que abriste la web.
+El servidor corre en `8086`; Vite en `5186`, con proxy de `/socket.io`. Para probar desde el teléfono en la misma red, usá `http://IP-DE-TU-PC:5186` y permití el acceso de Node en el firewall si es necesario. El enlace de invitación usa la dirección desde la que abriste la web.
 
 ## Qué incluye la base
 
@@ -46,7 +46,7 @@ El servidor corre en `3001`; Vite en `5173`, con proxy de `/socket.io`. Para pro
 - Descartes por ronda, reciclado del mazo y rotación del repartidor.
 - Victoria al terminar una ronda con al menos 200 puntos; desempate jugando otra ronda con todos.
 - Bots automáticos, ranking y registro de acciones.
-- Reconexión con token de sesión guardado por pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
+- Reconexión con token de sesión guardado por pestaña, con respaldo en el navegador para recuperar el asiento si el teléfono descarta la pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
 - Interfaz responsive, navegación por teclado y reglas dentro de la app.
 
 ## Imágenes con GPT Images
@@ -88,7 +88,7 @@ Los fondos no incluyen texto: números y etiquetas se dibujan en HTML para conse
 | `npm test`               | Reglas, simulaciones y salas Socket.IO             |
 | `npm run test:e2e`       | Flujos desktop/móvil en Chromium                   |
 | `npm run build`          | Compila web y servidor                             |
-| `npm start`              | Sirve el build completo en `http://localhost:3001` |
+| `npm start`              | Sirve el build completo en `http://localhost:8086` |
 | `npm run generate:cards` | Genera imágenes con GPT Images                     |
 | `npm run format`         | Formatea el código                                 |
 

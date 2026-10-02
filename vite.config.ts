@@ -5,10 +5,10 @@ export default defineConfig({
   root: 'apps/web',
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 5186,
     proxy: {
-      '/socket.io': { target: 'http://127.0.0.1:3001', ws: true },
-      '/health': 'http://127.0.0.1:3001',
+      '/socket.io': { target: 'http://127.0.0.1:8086', ws: true },
+      '/health': 'http://127.0.0.1:8086',
     },
   },
   build: { outDir: '../../dist/web', emptyOutDir: true },
