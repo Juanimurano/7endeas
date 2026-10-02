@@ -1,6 +1,20 @@
-# Flip Siete
+# 7 endeas
 
-Versión web multijugador de Flip 7, basada en el reglamento de `docs/Flip-7.pdf`. Interfaz en español rioplatense, salas por código, partidas en tiempo real y bots para probar sin esperar a otros jugadores.
+Juego web multijugador con temática endea, basado en las reglas de Flip 7 de `docs/Flip-7.pdf`. Interfaz en español rioplatense, salas por código, partidas en tiempo real y bots para probar sin esperar a otros jugadores.
+
+## La temática endea
+
+¿Endeás una más o te plantás? Cada número es una endea; juntá siete números distintos para hacer **¡7 endeas!** y ganar los 15 puntos extra.
+
+| Carta en 7 endeas | Efecto                                                                   |
+| ----------------- | ------------------------------------------------------------------------ |
+| **No endeas**     | Bloqueo: termina la ronda de un jugador activo, que conserva sus puntos. |
+| **Endeá tres**    | Saca tres: obliga a un jugador activo a robar 3 cartas.                  |
+| **Otra endea**    | Vida extra: protege de un número repetido una vez.                       |
+| **Endeas extra**  | Mejoras de +2, +4, +6, +8 y +10 puntos.                                  |
+| **Doble endea**   | ×2: duplica únicamente la suma de los números.                           |
+
+Los nombres temáticos aparecen en las cartas, las reglas, la elección de objetivos y el historial de la partida. Los prompts de GPT Images usan un motivo abstracto original de siete rayos como referencia visual recurrente al endea.
 
 ## Arrancar
 
@@ -26,8 +40,8 @@ El servidor corre en `3001`; Vite en `5173`, con proxy de `/socket.io`. Para pro
 - Salas privadas de 1 a 12 jugadores y anfitrión con control del lobby.
 - Mazo de **94 cartas**: 79 números, 6 mejoras y 9 acciones.
 - Pedir carta o plantarse, números repetidos y puntuación por ronda.
-- **Bloqueo**, **Saca tres** con acciones demoradas y encadenadas, **Vida extra** y transferencia de una segunda vida.
-- **Flip 7**: 7 números distintos, incluyendo el 0, cierre inmediato y bonus de 15.
+- **No endeas**, **Endeá tres** con acciones demoradas y encadenadas, **Otra endea** y transferencia de una segunda vida.
+- **¡7 endeas!**: 7 números distintos, incluyendo el 0, cierre inmediato y bonus de 15.
 - El ×2 duplica solamente la suma de los números.
 - Descartes por ronda, reciclado del mazo y rotación del repartidor.
 - Victoria al terminar una ronda con al menos 200 puntos; desempate jugando otra ronda con todos.

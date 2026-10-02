@@ -618,6 +618,19 @@ small {
   transform: rotate(-3deg);
   border-block: 1px solid #d5c7a1;
 }
+.card-effect {
+  position: absolute;
+  bottom: 14px;
+  padding: 2px 4px;
+  max-width: 95%;
+  font-size: 5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-align: center;
+  color: var(--purple);
+  background: #fffdf3;
+  border-radius: 2px;
+}
 .card-bonus,
 .card-double {
   background: #f7c95b;
@@ -669,7 +682,7 @@ small {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 21px;
+  font-size: 14px;
   letter-spacing: 0;
   color: var(--yellow);
   -webkit-text-stroke: 0;
@@ -700,6 +713,9 @@ small {
   inset: 4px;
 }
 .card-small .card-topline {
+  display: none;
+}
+.card-small .card-effect {
   display: none;
 }
 .card-small .card-value {

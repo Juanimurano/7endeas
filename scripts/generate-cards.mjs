@@ -21,36 +21,36 @@ try {
 const catalog = [
   ...Array.from({ length: 13 }, (_, value) => ({
     id: `number-${value}`,
-    brief: `Number card ${value}. Use a decorative abstract sunburst with ${Math.max(1, value)} small geometric rays. Palette: ivory, deep violet, ${['coral', 'teal', 'gold', 'raspberry'][value % 4]}.`,
+    brief: `Number card ${value}, themed as ${value === 1 ? 'one endea' : `${value} endeas`}. Use a decorative abstract sunburst surrounded by ${Math.max(1, value)} small seven-ray endea sparks. Palette: ivory, deep violet, ${['coral', 'teal', 'gold', 'raspberry'][value % 4]}.`,
   })),
   ...[2, 4, 6, 8, 10].map((value) => ({
     id: `bonus-${value}`,
-    brief: `Bonus points card +${value}. Golden yellow background, decorative rising starburst and ${value / 2} small radiant stars, deep violet outlines.`,
+    brief: `Bonus points card +${value}, called Endeas extra. Golden yellow background, a shower of small seven-ray endea sparks and ${value / 2} radiant stars, deep violet outlines.`,
   })),
   {
     id: 'double',
     brief:
-      'Double points card. Two interlocking golden suns, symmetrical, warm golden yellow background and violet outlines.',
+      'Double points card, called Doble endea. Two identical interlocking seven-ray endea emblems, symmetrical, warm golden yellow background and violet outlines.',
   },
   {
     id: 'life',
     brief:
-      'Extra life card. A large beautiful coral heart framed by a protective decorative ribbon, coral red and pale pink, deep violet outlines.',
+      'Extra life card, called Otra endea. A coral heart protecting a little seven-ray endea spark that shines again, framed by a decorative ribbon. Coral red and pale pink, deep violet outlines.',
   },
   {
     id: 'freeze',
     brief:
-      'Freeze action card. A striking padlock and icy geometric rays, teal and sky blue, deep violet outlines.',
+      'Freeze action card, called No endeas. A seven-ray endea spark stopped by a striking padlock and a geometric barrier, suggesting no more turns. Teal and sky blue, deep violet outlines.',
   },
   {
     id: 'draw3',
     brief:
-      'Draw three action card. Three stylized ivory cards fanning out with a playful zigzag lightning shape, golden yellow background, violet outlines.',
+      'Draw three action card, called Endeá tres. Three stylized ivory cards, each decorated with the same seven-ray endea spark, fanning out with a playful zigzag lightning shape. Golden yellow background, violet outlines.',
   },
   {
     id: 'back',
     brief:
-      'Card back. Elegant symmetrical sunburst and interwoven geometric ornament, deep violet background, ivory and golden yellow details. No numbers.',
+      'Card back for 7 endeas. Seven small seven-ray endea sparks arranged in a ring, with elegant interwoven geometric ornament. Deep violet background, ivory and golden yellow details. No numbers.',
   },
 ];
 const onlyIndex = process.argv.indexOf('--only');
@@ -62,7 +62,7 @@ if (!selected.length) {
 }
 const force = process.argv.includes('--force');
 const style =
-  'Create ORIGINAL illustration for a friendly retro art-deco party card game called Flip Siete. Do not copy an existing commercial card design. Portrait 2:3 ratio, flat hand-printed illustration with subtle paper grain, crisp deep violet linework, elegant geometric ornamental border and playful visual rhythm. Fill the whole canvas; no table, no mockup, no shadows outside the card. NO TEXT, NO LETTERS, NO NUMERALS, NO WATERMARK. Leave the middle 45% relatively uncluttered because the website overlays the value in accessible HTML. Match all cards with a cohesive ivory, violet, coral, teal, gold palette.';
+  'Create ORIGINAL illustration for a friendly retro art-deco party card game called 7 endeas. Its playful theme turns the invented word endea into a symbol of luck and taking one more chance. Represent an endea with an original abstract seven-ray spark motif, recurring consistently across the entire deck. Do not use an existing brand logo or copy an existing commercial card design. Portrait 2:3 ratio, flat hand-printed illustration with subtle paper grain, crisp deep violet linework, elegant geometric ornamental border and playful visual rhythm. Fill the whole canvas; no table, no mockup, no shadows outside the card. NO TEXT, NO LETTERS, NO NUMERALS, NO WATERMARK. Leave the middle 45% relatively uncluttered because the website overlays the value and themed Spanish card name in accessible HTML. Match all cards with a cohesive ivory, violet, coral, teal, gold palette.';
 console.log(
   `GPT Images (${model}) · ${selected.length} cartas seleccionadas. Una solicitud paga por carta nueva; las existentes se omiten.`,
 );
@@ -103,13 +103,20 @@ for (const card of selected) {
   await writeFile(
     resolve(directory, `${card.id}.json`),
     JSON.stringify(
-      { generator: 'GPT Images', model, prompt, generatedAt: new Date().toISOString() },
+      {
+        generator: 'GPT Images',
+        theme: '7 endeas',
+        model,
+        prompt,
+        generatedAt: new Date().toISOString(),
+      },
       null,
       2,
     ),
   );
   manifest.assets[card.id] = `/cards/${card.id}.webp`;
   manifest.generator = 'GPT Images';
+  manifest.theme = '7 endeas';
   manifest.model = model;
   manifest.status = Object.keys(manifest.assets).length === catalog.length ? 'complete' : 'partial';
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));

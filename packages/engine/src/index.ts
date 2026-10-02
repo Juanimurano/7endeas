@@ -186,7 +186,7 @@ function draw(state: GameState, rng: () => number): Card {
 export function cardLabel(card: Card): string {
   if (card.kind === 'number') return String(card.value);
   if (card.kind === 'bonus') return `+${card.value}`;
-  return { double: '×2', freeze: 'Bloqueo', draw3: 'Saca tres', life: 'Vida extra' }[card.kind];
+  return { double: '×2', freeze: 'No endeas', draw3: 'Endeá tres', life: 'Otra endea' }[card.kind];
 }
 
 function setEffect(state: GameState, actor: Player, card: ActionCard) {
@@ -218,7 +218,7 @@ function receive(
       const life = player.cards.findIndex((c) => c.kind === 'life');
       if (life >= 0) {
         state.roundDiscard.push(...player.cards.splice(life, 1), card);
-        note(state, `${player.name} usa Vida extra y sigue en la ronda.`);
+        note(state, `${player.name} usa Otra endea: descarta el repetido y sigue en la ronda.`);
       } else {
         player.cards.push(card);
         player.status = 'busted';
@@ -228,7 +228,7 @@ function receive(
       player.cards.push(card);
       if (numberCount(player) === 7) {
         state.flipSevenId = player.id;
-        note(state, `¡FLIP 7 de ${player.name}! +15 puntos y termina la ronda.`);
+        note(state, `¡7 ENDEAS de ${player.name}! +15 puntos y termina la ronda.`);
         finishRound(state);
       }
     }
@@ -306,14 +306,14 @@ export function dispatch(
     state.pending = null;
     if (pending.kind === 'life') {
       target.cards.push(pending.card);
-      note(state, `${actor.name} da una Vida extra a ${target.name}.`);
+      note(state, `${actor.name} regala Otra endea a ${target.name}: una vida extra.`);
     } else {
       state.roundDiscard.push(pending.card);
       if (pending.kind === 'freeze') {
         target.status = 'frozen';
-        note(state, `${actor.name} bloquea a ${target.name}, que asegura sus puntos.`);
+        note(state, `${actor.name} juega No endeas contra ${target.name}, que asegura sus puntos.`);
       } else {
-        note(state, `${actor.name} obliga a ${target.name} a sacar tres cartas.`);
+        note(state, `${actor.name} juega Endeá tres: ${target.name} debe sacar tres cartas.`);
         state.tasks.unshift({ type: 'draw', playerId: target.id, remaining: 3, deferred: [] });
       }
     }

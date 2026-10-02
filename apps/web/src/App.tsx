@@ -37,15 +37,15 @@ const statusLabel = {
   active: 'En juego',
   stood: 'Se plantó',
   busted: 'Número repetido',
-  frozen: 'Bloqueado',
+  frozen: 'No endeas · bloqueado',
 };
 
 function Brand() {
   return (
-    <div className="brand">
+    <div className="brand" role="img" aria-label="7 endeas">
       <span className="brand-mark">7</span>
       <span>
-        flip<span className="brand-light">siete</span>
+        endeas
         <span className="brand-dot">.</span>
       </span>
     </div>
@@ -78,7 +78,7 @@ function Rules({ close }: { close: () => void }) {
         <X />
       </button>
       <p className="eyebrow">UN MINUTO Y A JUGAR</p>
-      <h2 id="rules-title">Una más, ¿o te plantás?</h2>
+      <h2 id="rules-title">¿Endeás una más o te plantás?</h2>
       <p>
         En tu turno, pedí una carta o plantate para asegurar lo que llevás. La meta es llegar a{' '}
         <strong>200 puntos</strong>.
@@ -101,37 +101,38 @@ function Rules({ close }: { close: () => void }) {
         <div>
           <Sparkles />
           <p>
-            <strong>Siete números distintos = Flip 7.</strong> Ganás 15 extra y la ronda termina
+            <strong>Siete números distintos = ¡7 endeas!</strong> Ganás 15 extra y la ronda termina
             para todos. El 0 también cuenta.
           </p>
         </div>
         <div>
           <Heart />
           <p>
-            <strong>Vida extra.</strong> Descarta un número repetido y la vida; seguís jugando. Solo
-            una vida por persona. La segunda se regala a alguien activo sin vida.
+            <strong>Otra endea (vida extra).</strong> Descartá un número repetido y la vida; seguís
+            jugando. Solo una vida por persona. La segunda se regala a alguien activo sin vida.
           </p>
         </div>
         <div>
           <LockKeyhole />
           <p>
-            <strong>Bloqueo.</strong> Sacá de la ronda a un jugador activo, incluso a vos: conserva
-            sus puntos.
+            <strong>No endeas (bloqueo).</strong> Sacá de la ronda a un jugador activo, incluso a
+            vos: conserva sus puntos.
           </p>
         </div>
         <div>
           <Layers />
           <p>
-            <strong>Saca tres.</strong> Elegí a alguien activo para robar 3 cartas. Las vidas se
-            usan enseguida; Bloqueo y Saca tres esperan hasta terminar ese robo, si no pierde antes.
+            <strong>Endeá tres (robá 3 cartas).</strong> Elegí a alguien activo para robar 3 cartas.
+            Las vidas se usan enseguida; No endeas y Endeá tres esperan hasta terminar ese robo, si
+            no pierde antes.
           </p>
         </div>
       </div>
       <div className="score-example">
         <strong>¿Cómo se puntúa?</strong>
         <p>
-          Suma de números ×2 (si tenés esa mejora) + mejoras + 15 si hiciste Flip 7. El ×2 no
-          duplica las mejoras ni el bonus.
+          Suma de números ×2 (Doble endea) + mejoras (Endeas extra) + 15 si conseguiste 7 endeas. El
+          ×2 no duplica las mejoras ni el bonus.
         </p>
       </div>
       <p className="muted">
@@ -177,19 +178,19 @@ function Home({ connection }: { connection: Connection }) {
     <main className="home">
       <section className="hero">
         <span className="pill">
-          <span className="live-dot" /> EL PLAN EMPIEZA CON UNA CARTA
+          <span className="live-dot" /> EL PLAN EMPIEZA CON UNA ENDEA
         </span>
         <h1>
           La suerte está
           <br />
           echada.
           <br />
-          <span>¿Una más?</span>
+          <span>¿Endeás?</span>
         </h1>
         <p className="hero-description">
           Un número más puede cambiarlo todo.
           <br />
-          Tentá a la suerte, sumá puntos y jugá con tus amigos.
+          Endeá una más, sumá puntos y jugá con tus amigos.
         </p>
         <div className="hero-tags">
           <span>
@@ -217,7 +218,7 @@ function Home({ connection }: { connection: Connection }) {
             <Card card={{ id: 'hero-7', kind: 'number', value: 7 }} />
           </div>
           <div className="art-caption">
-            <Sparkles size={18} /> 7 distintas. Un gran momento.
+            <Sparkles size={18} /> 7 endeas. Un gran momento.
           </div>
         </div>
       </section>
@@ -326,7 +327,7 @@ function Home({ connection }: { connection: Connection }) {
         </div>
         <div className="how-step">
           <span>01</span>
-          <h3>Pedí una carta</h3>
+          <h3>Endeá una más</h3>
           <p>
             Cada número nuevo suma.
             <br /> Vos decidís cuánto arriesgar.
@@ -342,7 +343,7 @@ function Home({ connection }: { connection: Connection }) {
         </div>
         <div className="how-step">
           <span>07</span>
-          <h3>Hacé un Flip 7</h3>
+          <h3>Juntá 7 endeas</h3>
           <p>
             Siete números distintos.
             <br /> 15 extra. Aplausos merecidos.
@@ -547,7 +548,7 @@ function PlayerHand({
           numbers.map((card) => <Card key={card.id} card={card} small />)
         ) : (
           <div className="empty-hand">
-            <span>Las buenas manos empiezan con una carta.</span>
+            <span>Las buenas manos empiezan con una endea.</span>
             <span className="empty-card">?</span>
           </div>
         )}
@@ -555,7 +556,7 @@ function PlayerHand({
       <div className="hand-footer">
         <span>
           {numberCount(player)} / 7 números distintos
-          {game.flipSevenId === player.id && <b className="flip-badge"> ¡FLIP 7!</b>}
+          {game.flipSevenId === player.id && <b className="flip-badge"> ¡7 ENDEAS!</b>}
         </span>
         <span>{player.score} pts totales</span>
       </div>
@@ -582,7 +583,7 @@ function Game({ connection }: { connection: Connection }) {
     <main className="game-page">
       <div className="game-top">
         <div>
-          <p className="eyebrow">TENTÁ A LA SUERTE</p>
+          <p className="eyebrow">7 ENDEAS · TENTÁ A LA SUERTE</p>
           <h1>
             Ronda <span>{game.round.toString().padStart(2, '0')}</span>
           </h1>
@@ -598,14 +599,14 @@ function Game({ connection }: { connection: Connection }) {
                 ? `¡${winner?.name} ganó la partida!`
                 : game.phase === 'roundEnd'
                   ? game.flipSevenId
-                    ? '¡Flip 7! La ronda terminó.'
+                    ? '¡7 endeas! La ronda terminó.'
                     : 'Ronda terminada. Puntos asegurados.'
                   : pending
                     ? choose
                       ? `Elegí a quién darle ${cardLabel(pending.card)}`
                       : `${actor?.name} está eligiendo un objetivo`
                     : myTurn
-                      ? 'Es tu turno. ¿Una más?'
+                      ? 'Es tu turno. ¿Endeás una más?'
                       : `Turno de ${actor?.name}`}
             </strong>
             <span>
@@ -671,7 +672,7 @@ function Game({ connection }: { connection: Connection }) {
                       ? 'Termina su ronda y asegura sus puntos.'
                       : pending.kind === 'life'
                         ? 'Una segunda oportunidad para alguien sin vida.'
-                        : 'Debe sacar 3 cartas. Puede repetir… o hacer un Flip 7.'}
+                        : 'Debe sacar 3 cartas. Puede repetir… o juntar 7 endeas.'}
                   </p>
                 </div>
               </div>
@@ -756,7 +757,7 @@ function Game({ connection }: { connection: Connection }) {
                 disabled={!myTurn || disabled}
                 onClick={() => void send((ack) => socket.emit('game:action', { type: 'hit' }, ack))}
               >
-                ¡Una más! <Plus size={20} />
+                <span>¡Una endea más!</span> <Plus size={20} />
               </button>
             </div>
           </div>
@@ -794,7 +795,7 @@ function Game({ connection }: { connection: Connection }) {
           </section>
           <div className="sidebar-note">
             <Heart size={17} />
-            <p>La vida extra se usa automáticamente al repetir un número.</p>
+            <p>Otra endea te salva automáticamente al repetir un número.</p>
           </div>
         </aside>
       </div>
@@ -881,7 +882,7 @@ export default function App() {
           <Home connection={connection} />
         )}
         <footer className="site-footer">
-          <span>HECHO PARA COMPARTIR UNA BUENA PARTIDA.</span>
+          <span>HECHO PARA COMPARTIR UNA BUENA ENDEA.</span>
           <span>
             {Object.keys(art).length
               ? 'Arte generado con GPT Images'

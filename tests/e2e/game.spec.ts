@@ -20,14 +20,14 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
   await expect
     .poll(
       async () =>
-        (await page.getByRole('button', { name: '¡Una más!' }).isEnabled()) ||
+        (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) ||
         (await page.locator('.target-buttons button').first().isVisible()) ||
         (await page.getByRole('button', { name: 'Siguiente ronda' }).isVisible()),
       { timeout: 20000 },
     )
     .toBe(true);
-  if (await page.getByRole('button', { name: '¡Una más!' }).isEnabled()) {
-    await page.getByRole('button', { name: '¡Una más!' }).click();
+  if (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) {
+    await page.getByRole('button', { name: '¡Una endea más!' }).click();
   }
   // El primer robo puede ser una acción: elegimos un objetivo si corresponde.
   for (let i = 0; i < 30; i++) {
