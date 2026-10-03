@@ -39,10 +39,150 @@ function view(socket: Client): Promise<RoomView> {
   return new Promise((resolve) => socket.once('room:view', resolve));
 }
 
+async function pairedRoom() {
+  const host = await connect();
+  const session = await create(host);
+  const guest = await connect();
+  const joined = await ack((reply) =>
+    guest.emit('room:join', { code: session.code, name: 'Invitada' }, reply),
+  );
+  if (!joined.ok || !joined.session) throw new Error('No session');
+  await ack((reply) => host.emit('game:start', reply));
+  const room = server.rooms.get(session.code)!;
+  const seats = new Map([
+    [session.playerId, host],
+    [joined.session.playerId, guest],
+  ]);
+  async function finishRound() {
+    while (room.game!.phase === 'playing') {
+      const client = seats.get(room.game!.turnId!)!;
+      expect((await ack((reply) => client.emit('game:action', { type: 'stand' }, reply))).ok).toBe(
+        true,
+      );
+    }
+  }
+  return { host, guest, session, guestSession: joined.session, room, finishRound };
+}
+
 beforeEach(async () => {
   clients = [];
-  server = await createServer({ botDelay: 10, reconnectGrace: 20 });
+  server = await createServer({
+    botDelay: 10,
+    reconnectGrace: 20,
+    recapDuration: 160,
+    recapGrace: 500,
+  });
   url = await server.app.listen({ port: 0, host: '127.0.0.1' });
+});
+
+describe('Resumen y avance automático', () => {
+  it('sincroniza un único plazo y pasa de ronda sin un botón del anfitrión', async () => {
+    const { host, guest, room, finishRound } = await pairedRoom();
+    await finishRound();
+    const recap = room.roundRecap!;
+    expect(recap.nextRoundAt).toBeNull();
+    expect((await ack((reply) => host.emit('game:action', { type: 'nextRound' }, reply))).ok).toBe(
+      false,
+    );
+    await ack((reply) => host.emit('round:ready', { recapId: 'stale' }, reply));
+    expect(room.roundRecap!.nextRoundAt).toBeNull();
+    await ack((reply) => host.emit('round:ready', { recapId: recap.id }, reply));
+    expect(room.roundRecap!.nextRoundAt).toBeNull();
+    const started = view(host);
+    await ack((reply) => guest.emit('round:ready', { recapId: recap.id }, reply));
+    const visible = await started;
+    expect(visible.roundRecap?.durationMs).toBe(160);
+    expect(visible.roundRecap!.nextRoundAt! - visible.serverTime).toBeGreaterThan(140);
+    expect(visible.game?.players.every((player) => player.roundScore === 0)).toBe(true);
+    await expect.poll(() => room.game?.round).toBe(2);
+    expect(room.game?.phase).toBe('playing');
+    expect(room.roundRecap).toBeNull();
+  });
+  it('una reconexión y las confirmaciones repetidas no reinician la cuenta', async () => {
+    const { host, guest, guestSession, room, finishRound } = await pairedRoom();
+    await finishRound();
+    const recapId = room.roundRecap!.id;
+    await ack((reply) => host.emit('round:ready', { recapId }, reply));
+    await ack((reply) => guest.emit('round:ready', { recapId }, reply));
+    const deadline = room.roundRecap!.nextRoundAt;
+    guest.disconnect();
+    const resumed = await connect();
+    const received = view(resumed);
+    await ack((reply) => resumed.emit('room:resume', guestSession, reply));
+    expect((await received).roundRecap?.nextRoundAt).toBe(deadline);
+    await ack((reply) => resumed.emit('round:ready', { recapId }, reply));
+    expect(room.roundRecap!.nextRoundAt).toBe(deadline);
+    await expect.poll(() => room.game?.round).toBe(2);
+  });
+  it('los clientes que no confirman no bloquean el avance automático', async () => {
+    const client = await connect();
+    const session = await create(client);
+    await ack((reply) => client.emit('game:start', reply));
+    await ack((reply) => client.emit('game:action', { type: 'stand' }, reply));
+    const room = server.rooms.get(session.code)!;
+    expect(room.roundRecap!.nextRoundAt).toBeNull();
+    await expect.poll(() => room.game?.round, { timeout: 2000 }).toBe(2);
+  });
+  it('pausa cuando no hay humanos conectados y continúa al recuperar la sesión', async () => {
+    const client = await connect();
+    const session = await create(client);
+    await ack((reply) => client.emit('game:start', reply));
+    await ack((reply) => client.emit('game:action', { type: 'stand' }, reply));
+    const room = server.rooms.get(session.code)!;
+    const recapId = room.roundRecap!.id;
+    await ack((reply) => client.emit('round:ready', { recapId }, reply));
+    client.disconnect();
+    await expect.poll(() => room.roundRecap?.nextRoundAt).toBeNull();
+    await new Promise((resolve) => setTimeout(resolve, 220));
+    expect(room.game?.round).toBe(1);
+    const resumed = await connect();
+    await ack((reply) => resumed.emit('room:resume', session, reply));
+    await ack((reply) => resumed.emit('round:ready', { recapId }, reply));
+    await expect.poll(() => room.game?.round).toBe(2);
+  });
+  it('un ganador se anuncia sin resumen ni temporizador de siguiente ronda', async () => {
+    const client = await connect();
+    const session = await create(client);
+    await ack((reply) => client.emit('game:start', reply));
+    const room = server.rooms.get(session.code)!;
+    const index = room.game!.drawPile.findIndex(
+      (card) => card.kind === 'number' && card.value === 2,
+    );
+    room.game!.players[0].cards = [room.game!.drawPile.splice(index, 1)[0]];
+    room.game!.players[0].score = 199;
+    const finalView = view(client);
+    await ack((reply) => client.emit('game:action', { type: 'stand' }, reply));
+    const summary = await finalView;
+    expect(summary.game?.players[0].roundScore).toBe(2);
+    expect(summary.game?.players[0].score).toBe(201);
+    expect(summary.roundRecap).toBeNull();
+    expect(room.roundRecap).toBeNull();
+    expect(room.timer).toBeUndefined();
+    await new Promise((resolve) => setTimeout(resolve, 220));
+    expect(room.game?.phase).toBe('finished');
+    expect(room.game?.round).toBe(1);
+    expect(room.game?.players[0].score).toBe(201);
+    expect((await ack((reply) => client.emit('game:restart', reply))).ok).toBe(true);
+  });
+  it('un empate a 200 puntos avanza automáticamente a una ronda de desempate', async () => {
+    const { host, guest, room, finishRound } = await pairedRoom();
+    for (const player of room.game!.players) {
+      const index = room.game!.drawPile.findIndex(
+        (card) => card.kind === 'number' && card.value === 5,
+      );
+      player.cards = [room.game!.drawPile.splice(index, 1)[0]];
+      player.score = 195;
+    }
+    await finishRound();
+    expect(room.game?.winnerId).toBeNull();
+    const recapId = room.roundRecap!.id;
+    await ack((reply) => host.emit('round:ready', { recapId }, reply));
+    await ack((reply) => guest.emit('round:ready', { recapId }, reply));
+    await expect.poll(() => room.game?.round).toBe(2);
+    expect(
+      room.game?.players.every((player) => player.score === 200 && player.status === 'active'),
+    ).toBe(true);
+  });
 });
 afterEach(async () => {
   for (const client of clients) client.disconnect();

@@ -18,6 +18,7 @@ import type {
   ServerEvents,
   Seat,
   Session,
+  RoundRecap,
 } from '../../../packages/protocol/src/index';
 
 interface InternalSeat extends Seat {
@@ -32,6 +33,10 @@ interface Room {
   game: GameState | null;
   touched: number;
   timer?: ReturnType<typeof setTimeout>;
+  roundRecap: RoundRecap | null;
+  recapReaders: Set<string>;
+  recapReady: Set<string>;
+  recapWaitUntil: number | null;
 }
 type GameSocket = Socket<ClientEvents, ServerEvents>;
 const BOT_NAMES = [
@@ -54,6 +59,8 @@ export async function createServer(
     botDelay?: number;
     reconnectGrace?: number;
     logger?: boolean;
+    recapDuration?: number;
+    recapGrace?: number;
   } = {},
 ) {
   const app = Fastify({ logger: options.logger ?? false, bodyLimit: 16384 });
@@ -63,6 +70,8 @@ export async function createServer(
   const bindings = new Map<string, { room: Room; seat: InternalSeat }>();
   const grace = options.reconnectGrace ?? 45000;
   const delay = options.botDelay ?? 1100;
+  const recapDuration = options.recapDuration ?? 4000;
+  const recapGrace = options.recapGrace ?? 3000;
   const root = options.staticRoot ?? resolve(process.env.WEB_DIST_DIR ?? 'dist/web');
   if (existsSync(root)) await app.register(fastifyStatic, { root, prefix: '/' });
   app.get('/health', async () => ({ ok: true, rooms: rooms.size }));
@@ -78,16 +87,77 @@ export async function createServer(
       hostId: room.hostId,
       seats: room.seats.map(({ id, name, bot, connected }) => ({ id, name, bot, connected })),
       game: room.game ? projectView(room.game) : null,
+      serverTime: Date.now(),
+      roundRecap: room.roundRecap,
     });
     schedule(room);
   }
   function run(room: Room, id: string, action: GameAction) {
     if (!room.game) throw new Error('La partida no empezó.');
+    const playing = room.game.phase === 'playing';
     room.game = dispatch(room.game, id, action);
+    if (playing && room.game.phase === 'roundEnd') beginRecap(room);
     broadcast(room);
+  }
+  function humans(room: Room) {
+    return room.seats.filter((seat) => !seat.bot && seat.connected);
+  }
+  function beginRecap(room: Room) {
+    room.roundRecap = {
+      id: randomUUID(),
+      round: room.game!.round,
+      durationMs: recapDuration,
+      nextRoundAt: null,
+    };
+    room.recapReaders = new Set(humans(room).map((seat) => seat.id));
+    room.recapReady.clear();
+    room.recapWaitUntil = room.recapReaders.size ? Date.now() + recapGrace : null;
+  }
+  function startRecap(room: Room) {
+    if (!room.roundRecap || room.roundRecap.nextRoundAt !== null || !humans(room).length) return;
+    room.roundRecap.nextRoundAt = Date.now() + recapDuration;
+    room.recapWaitUntil = null;
+    broadcast(room);
+  }
+  function readersReady(room: Room) {
+    return (
+      room.recapReaders.size > 0 && [...room.recapReaders].every((id) => room.recapReady.has(id))
+    );
+  }
+  function finishRecap(room: Room) {
+    if (!room.roundRecap || !room.game) return;
+    const connected = humans(room);
+    if (!connected.length) {
+      room.roundRecap.nextRoundAt = null;
+      room.recapWaitUntil = null;
+      room.recapReady.clear();
+      broadcast(room);
+      return;
+    }
+    room.roundRecap = null;
+    room.recapReaders.clear();
+    room.recapReady.clear();
+    room.recapWaitUntil = null;
+    if (room.game.phase === 'roundEnd') run(room, connected[0].id, { type: 'nextRound' });
+    else broadcast(room);
   }
   function schedule(room: Room) {
     if (room.timer) clearTimeout(room.timer);
+    room.timer = undefined;
+    if (room.roundRecap) {
+      const deadline = room.roundRecap.nextRoundAt ?? room.recapWaitUntil;
+      if (deadline !== null) {
+        room.timer = setTimeout(
+          () => {
+            if (room.roundRecap?.nextRoundAt != null) finishRecap(room);
+            else startRecap(room);
+          },
+          Math.max(0, deadline - Date.now()),
+        );
+        room.timer.unref();
+      }
+      return;
+    }
     const game = room.game;
     if (!game || game.phase !== 'playing') return;
     const id = game.pending?.actorId ?? game.turnId;
@@ -143,6 +213,11 @@ export async function createServer(
     seat.connected = true;
     seat.socketId = socket.id;
     seat.offlineAt = undefined;
+    if (room.roundRecap?.nextRoundAt === null) {
+      room.recapReaders.add(seat.id);
+      room.recapReady.delete(seat.id);
+      room.recapWaitUntil ??= Date.now() + recapGrace;
+    }
     bindings.set(socket.id, { room, seat });
     socket.join(room.code);
     return { code: room.code, playerId: seat.id, token: seat.token };
@@ -159,6 +234,14 @@ export async function createServer(
     if (leave && !room.game) room.seats = room.seats.filter((s) => s.id !== seat.id);
     if (room.hostId === seat.id)
       room.hostId = room.seats.find((s) => !s.bot && s.connected)?.id ?? seat.id;
+    if (room.roundRecap) {
+      room.recapReaders.delete(seat.id);
+      room.recapReady.delete(seat.id);
+      if (!humans(room).length) {
+        room.roundRecap.nextRoundAt = null;
+        room.recapWaitUntil = null;
+      } else if (room.roundRecap.nextRoundAt === null && readersReady(room)) startRecap(room);
+    }
     broadcast(room);
   }
 
@@ -206,6 +289,10 @@ export async function createServer(
           seats: [seat],
           game: null,
           touched: Date.now(),
+          roundRecap: null,
+          recapReaders: new Set(),
+          recapReady: new Set(),
+          recapWaitUntil: null,
         };
         rooms.set(code, room);
         const session = bind(socket, room, seat);
@@ -279,7 +366,8 @@ export async function createServer(
         const { room, seat } = current(socket);
         if (!data || !['hit', 'stand', 'target', 'nextRound'].includes(data.type))
           throw new Error('Acción inválida.');
-        if (data.type === 'nextRound') requireHost(socket);
+        if (data.type === 'nextRound')
+          throw new Error('Las rondas avanzan automáticamente después del resumen de puntos.');
         run(room, seat.id, data);
       }),
     );
@@ -287,9 +375,23 @@ export async function createServer(
       attempt(ack, () => {
         const { room } = requireHost(socket);
         if (room.game?.phase !== 'finished') throw new Error('La partida no terminó.');
+        if (room.roundRecap) throw new Error('Esperá a que termine el resumen de puntos.');
         room.seats = room.seats.filter((s) => s.connected || s.bot);
         room.game = null;
         broadcast(room);
+      }),
+    );
+    socket.on('round:ready', (data, ack) =>
+      attempt(ack, () => {
+        const { room, seat } = current(socket);
+        if (
+          !room.roundRecap ||
+          room.roundRecap.id !== data?.recapId ||
+          room.roundRecap.nextRoundAt !== null
+        )
+          return;
+        room.recapReady.add(seat.id);
+        if (readersReady(room)) startRecap(room);
       }),
     );
     socket.on('disconnect', () => detach(socket));

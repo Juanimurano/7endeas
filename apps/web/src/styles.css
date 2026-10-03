@@ -2517,3 +2517,199 @@ small {
     display: none;
   }
 }
+
+/* Resumen corto entre rondas; el servidor controla la cuenta regresiva. */
+.round-recap-dialog {
+  width: min(640px, calc(100% - 28px));
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 28px;
+  border: 1px solid var(--accent-border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 20px 100px #00000080;
+}
+.round-recap-dialog[open] {
+  animation: reveal-appear 220ms ease-out both;
+}
+.round-recap-dialog::backdrop {
+  background: #07050dde;
+  backdrop-filter: blur(6px);
+}
+.recap-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 13px;
+}
+.recap-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+.recap-heading .eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.4px;
+}
+.recap-heading h2 {
+  font-size: 25px;
+  letter-spacing: -0.8px;
+  margin-top: 5px;
+}
+#recap-caption {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.recap-table-scroll {
+  max-height: calc(100dvh - 280px);
+  overflow: auto;
+}
+.recap-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.recap-table thead th {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 0 10px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+.recap-table thead th:first-child {
+  text-align: left;
+  width: 58%;
+}
+.recap-table tbody th,
+.recap-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.recap-table tbody tr:last-child th,
+.recap-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.recap-table tbody th {
+  text-align: left;
+  font-weight: 500;
+}
+.recap-mine {
+  background: var(--purple-soft);
+}
+.recap-player-name {
+  display: block;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.recap-player-name small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.recap-player-status {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.recap-earned,
+.recap-total {
+  text-align: right;
+  font-family: 'Space Grotesk';
+  font-variant-numeric: tabular-nums;
+}
+.recap-earned {
+  color: var(--green);
+  font-size: 19px;
+  font-weight: 600;
+}
+.recap-zero {
+  color: var(--danger);
+}
+.recap-total {
+  font-size: 21px;
+  font-weight: 700;
+}
+.recap-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+.recap-countdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--purple);
+}
+.recap-countdown > span {
+  display: flex;
+}
+.recap-progress {
+  display: block;
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--border);
+  accent-color: var(--purple);
+  margin-top: 14px;
+}
+.recap-progress::-webkit-progress-bar {
+  background: var(--border);
+}
+.recap-progress::-webkit-progress-value {
+  background: var(--purple);
+}
+.recap-progress::-moz-progress-bar {
+  background: var(--purple);
+}
+@media (max-width: 520px) {
+  .round-recap-dialog {
+    padding: 22px 16px;
+  }
+  .recap-heading {
+    gap: 10px;
+  }
+  .recap-heading h2 {
+    font-size: 21px;
+  }
+  .recap-icon {
+    width: 38px;
+    height: 38px;
+  }
+  .recap-table thead th {
+    font-size: 10px;
+    padding-inline: 7px;
+  }
+  .recap-table thead th:first-child {
+    width: 55%;
+  }
+  .recap-table tbody th,
+  .recap-table td {
+    padding-inline: 7px;
+  }
+  .recap-player-name {
+    font-size: 12px;
+  }
+  .recap-earned {
+    font-size: 17px;
+  }
+  .recap-total {
+    font-size: 19px;
+  }
+  .recap-countdown {
+    font-size: 11px;
+  }
+}

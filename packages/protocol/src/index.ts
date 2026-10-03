@@ -11,6 +11,14 @@ export interface RoomView {
   hostId: string;
   seats: Seat[];
   game: GameView | null;
+  serverTime: number;
+  roundRecap: RoundRecap | null;
+}
+export interface RoundRecap {
+  id: string;
+  round: number;
+  durationMs: number;
+  nextRoundAt: number | null;
 }
 export interface Session {
   code: string;
@@ -28,6 +36,7 @@ export interface ClientEvents {
   'game:start': (ack: Ack) => void;
   'game:action': (data: GameAction, ack: Ack) => void;
   'game:restart': (ack: Ack) => void;
+  'round:ready': (data: { recapId: string }, ack: Ack) => void;
 }
 export interface ServerEvents {
   'room:view': (view: RoomView) => void;

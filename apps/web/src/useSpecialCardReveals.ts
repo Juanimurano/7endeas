@@ -72,17 +72,25 @@ export function describeReveal(event: SpecialCardEvent, game: GameView): CardRev
 
 export function useSpecialCardReveals(room: RoomView | null, playerId?: string) {
   const [queue, setQueue] = useState<CardReveal[]>([]);
+  const [processedView, setProcessedView] = useState<string | null>(null);
   const cursor = useRef<{ code: string; sequence: number; round: number } | null>(null);
   useEffect(() => {
     if (!room || !playerId || !room.game) {
       cursor.current = room ? { code: room.code, sequence: 0, round: 0 } : null;
       setQueue((current) => (current.length ? [] : current));
+      setProcessedView(null);
       return;
     }
     const game = room.game;
+    setProcessedView(`${room.code}:${game.round}:${game.sequence}`);
     const previous = cursor.current;
     const initial = !previous || previous.code !== room.code || game.sequence < previous.sequence;
     cursor.current = { code: room.code, sequence: game.sequence, round: game.round };
+    // Cuando empieza la cuenta del resumen, los avisos finales ya tuvieron su margen de lectura.
+    if (game.phase !== 'playing' && room.roundRecap?.nextRoundAt != null) {
+      setQueue((current) => (current.length ? [] : current));
+      return;
+    }
     // En una reconexión no reproducimos la historia. Sí recordamos una acción aún pendiente.
     const incoming = game.cardEvents.filter(
       (event) =>
@@ -100,5 +108,7 @@ export function useSpecialCardReveals(room: RoomView | null, playerId?: string) 
   function dismiss() {
     setQueue((current) => current.slice(1));
   }
-  return { reveal: queue[0] ?? null, count: queue.length, dismiss };
+  const settled =
+    !!room?.game && processedView === `${room.code}:${room.game.round}:${room.game.sequence}`;
+  return { reveal: queue[0] ?? null, count: queue.length, dismiss, settled };
 }

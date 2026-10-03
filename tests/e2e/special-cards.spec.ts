@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { createServer } from '../../apps/server/src/server';
 import type { GameState } from '../../packages/engine/src/index';
+import { awaitRoundRecap } from './helpers';
 
 let server: Awaited<ReturnType<typeof createServer>>;
 let url: string;
@@ -74,7 +75,7 @@ test('arte completo, giro animado, cola de especiales y recarga sin repetir avis
   await dialog.getByRole('button', { name: 'Entendido' }).click();
   await expect(page.locator('.held-action .full-art')).toHaveCount(1);
   await page.locator('.target-buttons').getByRole('button', { name: 'Juani (vos)' }).click();
-  await expect(page.getByRole('button', { name: 'Siguiente ronda' })).toBeVisible();
+  await awaitRoundRecap(page);
   await page.reload();
   await expect(page.locator('.game-page')).toBeVisible();
   await expect(page.locator('.card-reveal-dialog')).toHaveCount(0);
@@ -126,7 +127,7 @@ test('el afectado recibe el aviso, el regalo se revela y se respeta movimiento r
   ).toBe('none');
   await dialog.getByRole('button', { name: 'Entendido' }).click();
   await page.getByRole('button', { name: 'Me planto' }).click();
-  await page.getByRole('button', { name: 'Siguiente ronda' }).click();
+  await expect(page.locator('.game-top h1')).toContainText('02', { timeout: 10000 });
   await hostTurn();
   putOnTop(room.game!, 'life', 'number', 'life');
   await page.getByRole('button', { name: '¡Una endea más!' }).click();

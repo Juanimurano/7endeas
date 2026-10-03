@@ -34,6 +34,8 @@ import CardRevealDialog from './CardRevealDialog';
 import { useSpecialCardReveals } from './useSpecialCardReveals';
 import WinnerCelebration from './WinnerCelebration';
 import { useWinnerCelebration } from './useWinnerCelebration';
+import RoundRecapDialog from './RoundRecapDialog';
+import { useRoundRecapReady } from './useRoundRecapReady';
 import { useGame } from './useGame';
 
 type Connection = ReturnType<typeof useGame>;
@@ -647,23 +649,19 @@ function Game({ connection }: { connection: Connection }) {
                     : 'Los puntos ya están guardados.'
                   : 'Repetí un número y perdés la ronda.\nConseguí 7 distintos y ganás 15 extra.'}
               </p>
-              {gameOver && host && (
+              {winner && host && (
                 <button
                   className="button primary"
                   disabled={disabled}
-                  onClick={() =>
-                    void send((ack) =>
-                      winner
-                        ? socket.emit('game:restart', ack)
-                        : socket.emit('game:action', { type: 'nextRound' }, ack),
-                    )
-                  }
+                  onClick={() => void send((ack) => socket.emit('game:restart', ack))}
                 >
-                  {winner ? 'Volver al lobby' : 'Siguiente ronda'}{' '}
-                  {winner ? <RotateCcw size={18} /> : <ArrowRight size={18} />}
+                  Volver al lobby <RotateCcw size={18} />
                 </button>
               )}
-              {gameOver && !host && <span className="pill">Esperando al anfitrión</span>}
+              {game.phase === 'roundEnd' && (
+                <span className="pill">La siguiente ronda empieza automáticamente</span>
+              )}
+              {winner && !host && <span className="pill">Esperando al anfitrión</span>}
             </div>
           </div>
           {pending && (
@@ -813,12 +811,17 @@ export default function App() {
   const [rules, setRules] = useState(false);
   const [art, setArt] = useState<Record<string, string>>({});
   const [printedFaces, setPrintedFaces] = useState<string[]>([]);
-  const { reveal, count, dismiss } = useSpecialCardReveals(
+  const { reveal, count, dismiss, settled } = useSpecialCardReveals(
     connection.room,
     connection.session?.playerId,
   );
   const { room, connected, error, busy } = connection;
   const { victory, dismiss: dismissVictory } = useWinnerCelebration(room);
+  useRoundRecapReady(room, connection.socket, connected, settled && !reveal && !rules);
+  const showRecap = room?.game?.phase === 'roundEnd' && !!room.roundRecap?.nextRoundAt;
+  useEffect(() => {
+    if (room?.roundRecap?.nextRoundAt != null) setRules(false);
+  }, [room?.roundRecap?.nextRoundAt]);
   useEffect(() => {
     const controller = new AbortController();
     fetch('/cards/manifest.json', { signal: controller.signal })
@@ -908,8 +911,8 @@ export default function App() {
             </span>
           </footer>
         </div>
-        {rules && <Rules close={() => setRules(false)} />}
-        {reveal && (
+        {rules && !showRecap && <Rules close={() => setRules(false)} />}
+        {reveal && !showRecap && (
           <CardRevealDialog
             key={`${room?.code}-${reveal.event.id}`}
             reveal={reveal}
@@ -917,7 +920,17 @@ export default function App() {
             onDismiss={dismiss}
           />
         )}
-        {victory && !reveal && !rules && (
+        {showRecap && room?.game && room.roundRecap && (
+          <RoundRecapDialog
+            key={room.roundRecap.id}
+            game={room.game}
+            recap={room.roundRecap}
+            serverTime={room.serverTime}
+            playerId={connection.session?.playerId}
+            connected={connected}
+          />
+        )}
+        {victory && !reveal && !rules && !showRecap && (
           <WinnerCelebration
             key={victory.key}
             victory={victory}

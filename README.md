@@ -45,6 +45,7 @@ El servidor corre en `8086`; Vite en `5186`, con proxy de `/socket.io`. Para pro
 - **¡7 endeas!**: 7 números distintos, incluyendo el 0, cierre inmediato y bonus de 15.
 - El ×2 duplica solamente la suma de los números.
 - Descartes por ronda, reciclado del mazo y rotación del repartidor.
+- Resumen automático de puntos entre rondas: muestra lo que sumó cada jugador y su total durante 4 segundos, y luego empieza la siguiente sin apretar un botón. Cuando hay un ganador confirmado, aparece directamente la celebración, sin resumen previo; los empates mantienen el resumen y continúan con otra ronda.
 - Victoria al terminar una ronda con al menos 200 puntos; desempate jugando otra ronda con todos.
 - Celebración de victoria para toda la mesa, con trofeo animado, confeti, nombre y puntuación del ganador. Espera a que se cierren los avisos de cartas especiales y respeta movimiento reducido.
 - Bots automáticos, ranking y registro de acciones.
@@ -62,6 +63,8 @@ npm run import:cards
 ```
 
 Cada jugador recibe un aviso con la carta, su efecto y un botón **Entendido**. Las vidas quedan visibles junto a la mano; las acciones pendientes se muestran junto a la selección del objetivo. Al reconectar se evita reproducir avisos antiguos; una elección todavía pendiente sí se recuerda.
+
+Al cerrar la ronda hay hasta 3 segundos de margen para los últimos avisos; cuando todos terminaron de leerlos, o se agota ese margen, empieza la cuenta sincronizada de 4 segundos del resumen. El servidor controla el avance y una reconexión no reinicia la cuenta. Si no queda ningún humano conectado, la mesa espera a que alguien vuelva para mostrarle el resumen y continuar.
 
 ## Comandos
 

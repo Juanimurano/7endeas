@@ -1,6 +1,7 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { createServer } from '../../apps/server/src/server';
 import type { GameState, Card } from '../../packages/engine/src/index';
+import { awaitRoundRecap } from './helpers';
 
 let server: Awaited<ReturnType<typeof createServer>>;
 let url: string;
@@ -71,7 +72,10 @@ test('todos ven al ganador, la celebración no se repite al recargar y vuelve en
   await second.getByRole('button', { name: 'Me planto' }).click();
   const winnerDialog = page.getByRole('dialog', { name: 'Campeona de Endeas ganó la partida' });
   const guestDialog = guest.getByRole('dialog', { name: 'Campeona de Endeas ganó la partida' });
-  await expect(winnerDialog).toBeVisible();
+  await expect(winnerDialog).toBeVisible({ timeout: 2000 });
+  await expect(page.locator('.round-recap-dialog')).toHaveCount(0);
+  await expect(guest.locator('.round-recap-dialog')).toHaveCount(0);
+  expect(room.roundRecap).toBeNull();
   await expect(guestDialog).toBeVisible();
   await expect(winnerDialog.locator('.victory-score strong')).toHaveText('201');
   await expect(winnerDialog).toContainText('¡GANASTE!');
@@ -101,7 +105,9 @@ test('todos ven al ganador, la celebración no se repite al recargar y vuelve en
   rematch.players[1].score = 199;
   rematch.players[1].cards = [take(rematch, 'number', 3)];
   await standBoth(rematch, page, guest);
-  await expect(page.getByRole('dialog', { name: 'Amiga ganó la partida' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Amiga ganó la partida' })).toBeVisible({
+    timeout: 10000,
+  });
   await expect(guest.getByRole('dialog', { name: 'Amiga ganó la partida' })).toBeVisible();
 });
 
@@ -118,12 +124,11 @@ test('un empate no celebra y la victoria espera el último aviso de carta especi
     player.cards = [take(tied, 'number', 5)];
   }
   await standBoth(tied, page, guest);
-  await expect(page.getByRole('button', { name: 'Siguiente ronda' })).toBeVisible();
+  await awaitRoundRecap(page);
   expect(room.game!.phase).toBe('roundEnd');
   await expect(page.locator('.victory-dialog')).toHaveCount(0);
   await expect(guest.locator('.victory-dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Siguiente ronda' }).click();
-  await expect(page.locator('.game-top h1')).toContainText('02');
+  await expect(page.locator('.game-top h1')).toContainText('02', { timeout: 10000 });
   if (room.game!.turnId === room.game!.players[1].id)
     await guest.getByRole('button', { name: 'Me planto' }).click();
   await expect(page.getByRole('button', { name: '¡Una endea más!' })).toBeEnabled();
@@ -151,7 +156,8 @@ test('un empate no celebra y la victoria espera el último aviso de carta especi
   await expect(page.locator('.victory-dialog')).toHaveCount(0);
   await lastCard.getByRole('button', { name: 'Entendido' }).click();
   const victory = page.getByRole('dialog', { name: 'Campeona de Endeas ganó la partida' });
-  await expect(victory).toBeVisible();
+  await expect(victory).toBeVisible({ timeout: 2000 });
+  await expect(page.locator('.round-recap-dialog')).toHaveCount(0);
   await expect(victory.locator('.victory-score strong')).toHaveText('236');
   await expect(
     guest.getByRole('dialog', { name: 'Campeona de Endeas ganó la partida' }),

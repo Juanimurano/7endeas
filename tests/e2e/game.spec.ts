@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { dismissReveals } from './helpers';
+import { dismissReveals, awaitRoundRecap } from './helpers';
 
 test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo) => {
   const errors: string[] = [];
@@ -25,7 +25,7 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
         return (
           (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) ||
           (await page.locator('.target-buttons button').first().isVisible()) ||
-          (await page.getByRole('button', { name: 'Siguiente ronda' }).isVisible())
+          (await page.locator('.round-recap-dialog').isVisible())
         );
       },
       { timeout: 20000 },
@@ -39,22 +39,19 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
     await dismissReveals(page);
     const target = page.locator('.target-buttons button').first();
     if (await target.isVisible()) await target.click();
-    if (await page.getByRole('button', { name: 'Siguiente ronda' }).isVisible()) break;
+    if (await page.locator('.round-recap-dialog').isVisible()) break;
     const stand = page.getByRole('button', { name: 'Me planto' });
     if (await stand.isEnabled()) await stand.click();
     await page.waitForTimeout(500);
   }
-  await expect(page.getByRole('button', { name: 'Siguiente ronda' })).toBeVisible({
-    timeout: 15000,
-  });
-  await dismissReveals(page);
+  await awaitRoundRecap(page);
   await page.screenshot({ path: `test-results/game-${testInfo.project.name}.png`, fullPage: true });
   await expect(page.locator('body')).toHaveJSProperty(
     'scrollWidth',
     await page.locator('body').evaluate((el) => el.clientWidth),
   );
-  await page.getByRole('button', { name: 'Siguiente ronda' }).click();
-  await expect(page.locator('.game-top h1')).toContainText('02');
+  await expect(page.getByRole('button', { name: 'Siguiente ronda' })).toHaveCount(0);
+  await expect(page.locator('.game-top h1')).toContainText('02', { timeout: 10000 });
   await page.reload();
   await expect(page.locator('.game-top h1')).toContainText('02');
   await expect(page.locator('.connection-banner')).toHaveCount(0);
@@ -76,14 +73,16 @@ test('dos navegadores comparten sala y ronda', async ({ browser, page }) => {
   await expect(guest.locator('.seat-list .seat')).toHaveCount(2);
   await page.getByRole('button', { name: '¡Empezar partida!' }).click();
   await expect(guest.locator('.game-page')).toBeVisible();
-  // Ambos se plantan; verifica sincronización y control del anfitrión.
+  // Ambos se plantan; el resumen y el avance se sincronizan sin intervención del anfitrión.
   const first = (await page.getByRole('button', { name: 'Me planto' }).isEnabled()) ? page : guest;
   const second = first === page ? guest : page;
   await first.getByRole('button', { name: 'Me planto' }).click();
   await expect(second.getByRole('button', { name: 'Me planto' })).toBeEnabled();
   await second.getByRole('button', { name: 'Me planto' }).click();
-  await expect(page.getByRole('button', { name: 'Siguiente ronda' })).toBeVisible();
-  await expect(guest.getByText('Esperando al anfitrión', { exact: true })).toBeVisible();
+  await awaitRoundRecap(page);
+  await awaitRoundRecap(guest);
+  await expect(page.locator('.game-top h1')).toContainText('02', { timeout: 10000 });
+  await expect(guest.locator('.game-top h1')).toContainText('02', { timeout: 10000 });
   await context.close();
 });
 
