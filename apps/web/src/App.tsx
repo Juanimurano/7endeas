@@ -176,58 +176,12 @@ function Home({ connection }: { connection: Connection }) {
   }
   return (
     <main className="home">
-      <section className="hero">
-        <span className="pill">
-          <span className="live-dot" /> EL PLAN EMPIEZA CON UNA ENDEA
-        </span>
-        <h1>
-          La suerte está
-          <br />
-          echada.
-          <br />
-          <span>¿Endeás?</span>
-        </h1>
-        <p className="hero-description">
-          Un número más puede cambiarlo todo.
-          <br />
-          Endeá una más, sumá puntos y jugá con tus amigos.
-        </p>
-        <div className="hero-tags">
-          <span>
-            <Users size={16} /> Hasta 12 jugadores
-          </span>
-          <span>
-            <Radio size={16} /> En tiempo real
-          </span>
-          <span>
-            <ShieldCheck size={16} /> Sin registro
-          </span>
-        </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="orbit orbit-one" />
-          <div className="orbit orbit-two" />
-          <span className="art-spark spark-one">✳</span>
-          <span className="art-spark spark-two">✦</span>
-          <div className="fan-card fan-one">
-            <Card card={{ id: 'hero-4', kind: 'number', value: 4 }} />
-          </div>
-          <div className="fan-card fan-two">
-            <Card card={{ id: 'hero-12', kind: 'number', value: 12 }} />
-          </div>
-          <div className="fan-card fan-three">
-            <Card card={{ id: 'hero-7', kind: 'number', value: 7 }} />
-          </div>
-          <div className="art-caption">
-            <Sparkles size={18} /> 7 endeas. Un gran momento.
-          </div>
-        </div>
-      </section>
-      <section className="entry-panel">
+      <section className="entry-panel" aria-labelledby="entry-title">
         <div className="entry-heading">
           <span className="section-number">01 /</span>
           <span>TU PRÓXIMA PARTIDA</span>
         </div>
-        <h2>Hay lugar en la mesa.</h2>
+        <h2 id="entry-title">Hay lugar en la mesa.</h2>
         <p className="muted">Elegí tu nombre. Invitá a tu gente. A jugar.</p>
         <div className="segmented" role="group" aria-label="Tipo de sala">
           <button
@@ -305,15 +259,50 @@ function Home({ connection }: { connection: Connection }) {
         >
           <Bot size={19} /> Jugar con 2 bots <ArrowUpRight size={18} />
         </button>
-        <div className="quick-tip">
-          <span className="tip-icon">
-            <Sparkles size={20} />
+      </section>
+      <section className="hero">
+        <span className="pill">
+          <span className="live-dot" /> EL PLAN EMPIEZA CON UNA ENDEA
+        </span>
+        <h1>
+          La suerte está
+          <br /> echada.
+          <br />
+          <span>¿Endeás?</span>
+        </h1>
+        <p className="hero-description">
+          Un número más puede cambiarlo todo.
+          <br />
+          Endeá una más, sumá puntos y jugá con tus amigos.
+        </p>
+        <div className="hero-tags">
+          <span>
+            <Users size={16} aria-hidden="true" /> Hasta 12 jugadores
           </span>
-          <p>
-            <strong>Un pequeño consejo</strong>
-            <br />
-            El 12 suma mucho. También hay doce cartas del 12. Ya sabés por dónde va la cosa.
-          </p>
+          <span>
+            <Radio size={16} aria-hidden="true" /> En tiempo real
+          </span>
+          <span>
+            <ShieldCheck size={16} aria-hidden="true" /> Sin registro
+          </span>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          <div className="orbit orbit-one" />
+          <div className="orbit orbit-two" />
+          <span className="art-spark spark-one">✳</span>
+          <span className="art-spark spark-two">✦</span>
+          <div className="fan-card fan-one">
+            <Card card={{ id: 'hero-4', kind: 'number', value: 4 }} />
+          </div>
+          <div className="fan-card fan-two">
+            <Card card={{ id: 'hero-12', kind: 'number', value: 12 }} />
+          </div>
+          <div className="fan-card fan-three">
+            <Card card={{ id: 'hero-7', kind: 'number', value: 7 }} />
+          </div>
+          <div className="art-caption">
+            <Sparkles size={18} /> 7 endeas. Un gran momento.
+          </div>
         </div>
       </section>
       <section className="how-it-works">
@@ -390,29 +379,6 @@ function Lobby({ connection }: { connection: Connection }) {
   const host = room.hostId === session?.playerId;
   return (
     <main className="lobby">
-      <div className="lobby-intro">
-        <p className="eyebrow">LA MESA ESTÁ CASI LISTA</p>
-        <h1>
-          Mejor con
-          <br />
-          <span>buena compañía.</span>
-        </h1>
-        <p className="muted">
-          Compartí el código o el enlace.
-          <br />
-          Tus amigos entran desde cualquier navegador.
-        </p>
-        <div className="lobby-deck" aria-hidden="true">
-          <Card back />
-          <Card card={{ id: 'lobby', kind: 'life' }} />
-        </div>
-        <div className="lobby-tip">
-          <Sparkles size={20} />
-          <p>
-            ¿No llegó nadie todavía? Agregá un bot y practicá. También podés jugar en solitario.
-          </p>
-        </div>
-      </div>
       <section className="lobby-panel">
         <Invite room={room} onError={connection.setError} />
         <div className="section-header">
@@ -485,6 +451,29 @@ function Lobby({ connection }: { connection: Connection }) {
           )}
         </div>
       </section>
+      <div className="lobby-intro">
+        <p className="eyebrow">LA MESA ESTÁ CASI LISTA</p>
+        <h1>
+          Mejor con
+          <br />
+          <span>buena compañía.</span>
+        </h1>
+        <p className="muted">
+          Compartí el código o el enlace.
+          <br />
+          Tus amigos entran desde cualquier navegador.
+        </p>
+        <div className="lobby-deck" aria-hidden="true">
+          <Card back />
+          <Card card={{ id: 'lobby', kind: 'life' }} />
+        </div>
+        <div className="lobby-tip">
+          <Sparkles size={20} aria-hidden="true" />
+          <p>
+            ¿No llegó nadie todavía? Agregá un bot y practicá. También podés jugar en solitario.
+          </p>
+        </div>
+      </div>
     </main>
   );
 }
@@ -527,7 +516,9 @@ function PlayerHand({
             {!player.connected && !player.bot
               ? 'Desconectado · turno automático en 45 s'
               : current
-                ? 'Su turno'
+                ? mine
+                  ? 'Tu turno'
+                  : 'Su turno'
                 : statusLabel[player.status]}
           </span>
         </div>
@@ -552,13 +543,13 @@ function PlayerHand({
           ),
         )}
       </div>
-      <div className="number-row">
+      <div className={`number-row ${numbers.length ? '' : 'empty-number-row'}`}>
         {numbers.length ? (
           numbers.map((card) => <Card key={card.id} card={card} small />)
         ) : (
           <div className="empty-hand">
-            <span>Las buenas manos empiezan con una endea.</span>
-            <span className="empty-card">?</span>
+            <Layers size={18} aria-hidden="true" />
+            <span>Todavía sin cartas</span>
           </div>
         )}
       </div>
@@ -575,6 +566,17 @@ function PlayerHand({
 
 function Game({ connection }: { connection: Connection }) {
   const { room, session, socket, send, busy, connected } = connection;
+  const actionBar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = actionBar.current;
+    const page = bar?.closest<HTMLElement>('.game-page');
+    if (!bar || !page) return;
+    const resize = new ResizeObserver(() => {
+      page.style.setProperty('--action-bar-height', `${bar.getBoundingClientRect().height}px`);
+    });
+    resize.observe(bar);
+    return () => resize.disconnect();
+  }, []);
   if (!room?.game) return null;
   const game = room.game;
   const me = game.players.find((p) => p.id === session?.playerId);
@@ -592,7 +594,7 @@ function Game({ connection }: { connection: Connection }) {
     <main className="game-page">
       <div className="game-top">
         <div>
-          <p className="eyebrow">7 ENDEAS · TENTÁ A LA SUERTE</p>
+          <p className="eyebrow">META: 200 PUNTOS</p>
           <h1>
             Ronda <span>{game.round.toString().padStart(2, '0')}</span>
           </h1>
@@ -601,47 +603,43 @@ function Game({ connection }: { connection: Connection }) {
       </div>
       <div className="game-layout">
         <section className="table-area">
-          <div className={`turn-banner ${myTurn || choose ? 'your-turn' : ''}`} aria-live="polite">
-            <span className="live-dot" />
-            <strong>
-              {game.phase === 'finished'
-                ? `¡${winner?.name} ganó la partida!`
-                : game.phase === 'roundEnd'
-                  ? game.flipSevenId
-                    ? '¡7 endeas! La ronda terminó.'
-                    : 'Ronda terminada. Puntos asegurados.'
-                  : pending
-                    ? choose
-                      ? `Elegí a quién darle ${cardLabel(pending.card)}`
-                      : `${actor?.name} está eligiendo un objetivo`
-                    : myTurn
-                      ? 'Es tu turno. ¿Endeás una más?'
-                      : `Turno de ${actor?.name}`}
-            </strong>
-            <span>
-              {game.phase === 'playing' ? 'La meta: 200 puntos' : 'Cada carta tiene su historia.'}
+          <div className="table-toolbar">
+            <div className={`turn-banner ${myTurn || choose ? 'your-turn' : ''}`} role="status">
+              <span className="live-dot" />
+              <strong>
+                {game.phase === 'finished'
+                  ? `¡${winner?.name} ganó la partida!`
+                  : game.phase === 'roundEnd'
+                    ? game.flipSevenId
+                      ? '¡7 endeas! La ronda terminó.'
+                      : 'Ronda terminada. Puntos asegurados.'
+                    : pending
+                      ? choose
+                        ? `Elegí a quién darle ${cardLabel(pending.card)}`
+                        : `${actor?.name} está eligiendo un objetivo`
+                      : myTurn
+                        ? 'Tu turno'
+                        : `Turno de ${actor?.name}`}
+              </strong>
+            </div>
+            <span
+              className={`deck-count ${game.deckCount <= 15 ? 'deck-low' : ''}`}
+              aria-label={`${game.deckCount} cartas en el mazo`}
+            >
+              <Layers size={18} aria-hidden="true" />
+              <span>
+                <span className="deck-label">Mazo</span>
+                <strong>{game.deckCount}</strong> cartas
+              </span>
             </span>
           </div>
-          <div className="table-center">
-            <div className="deck-stack">
-              <Card back />
-              <span>{game.deckCount} cartas en el mazo</span>
-            </div>
-            <div className="table-message">
-              <span className="eyebrow">{gameOver ? 'BIEN JUGADO' : 'EL ARTE DE SABER PARAR'}</span>
-              <h2>
-                {gameOver
-                  ? winner
-                    ? 'La suerte te sonríe.'
-                    : 'Una ronda más cerca.'
-                  : 'Un poco de suerte.\nUn poco de coraje.'}
-              </h2>
+          {gameOver && (
+            <div className="round-summary">
+              <h2>{winner ? 'La suerte te sonríe.' : 'Una ronda más cerca.'}</h2>
               <p>
-                {gameOver
-                  ? me
-                    ? `Sumaste ${me.roundScore} puntos esta ronda. Llevás ${me.score} en total.`
-                    : 'Los puntos ya están guardados.'
-                  : 'Repetí un número y perdés la ronda.\nConseguí 7 distintos y ganás 15 extra.'}
+                {me
+                  ? `Sumaste ${me.roundScore} puntos esta ronda. Llevás ${me.score} en total.`
+                  : 'Los puntos ya están guardados.'}
               </p>
               {winner && host && (
                 <button
@@ -657,7 +655,7 @@ function Game({ connection }: { connection: Connection }) {
               )}
               {winner && !host && <span className="pill">Esperando al anfitrión</span>}
             </div>
-          </div>
+          )}
           {pending && (
             <section className="target-panel">
               <div>
@@ -714,18 +712,18 @@ function Game({ connection }: { connection: Connection }) {
                 />
               ))}
           </div>
-          <div className={`action-bar ${myTurn ? 'action-active' : ''}`}>
+          <div ref={actionBar} className={`action-bar ${myTurn ? 'action-active' : ''}`}>
             <div>
               <span className="eyebrow">
                 {myTurn
-                  ? 'LA DECISIÓN ES TUYA'
+                  ? 'TU TURNO'
                   : choose
-                    ? 'RESOLVÉ TU CARTA'
+                    ? 'CARTA ESPECIAL'
                     : gameOver
                       ? 'PUNTOS GUARDADOS'
                       : me?.status === 'active'
-                        ? 'PREPARÁ TU PRÓXIMA JUGADA'
-                        : 'POR ESTA RONDA, YA ESTÁ'}
+                        ? 'EN JUEGO'
+                        : 'RONDA CERRADA'}
               </span>
               <strong>
                 {myTurn
@@ -751,10 +749,15 @@ function Game({ connection }: { connection: Connection }) {
               </button>
               <button
                 className="button primary"
+                aria-label="¡Una endea más!"
                 disabled={!myTurn || disabled}
                 onClick={() => void send((ack) => socket.emit('game:action', { type: 'hit' }, ack))}
               >
-                <span>¡Una endea más!</span> <Plus size={20} />
+                <span className="action-hit-label">¡Una endea más!</span>
+                <span className="action-hit-short" aria-hidden="true">
+                  Una más
+                </span>
+                <Plus size={20} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -904,8 +907,8 @@ export default function App() {
             <span>HECHO PARA COMPARTIR UNA BUENA ENDEA.</span>
             <span>
               {Object.keys(art).length
-                ? 'Arte generado con GPT Images'
-                : 'Arte provisional · GPT Images pendiente'}
+                ? 'Arte generado con endeas'
+                : 'Arte provisional · endeas pendiente'}
               <span className="footer-separator">/</span>Versión 0.1
             </span>
           </footer>

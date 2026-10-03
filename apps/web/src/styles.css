@@ -262,6 +262,8 @@ small {
   padding-top: 55px;
 }
 .hero {
+  grid-column: 1;
+  grid-row: 1;
   position: relative;
   min-height: 680px;
 }
@@ -368,6 +370,8 @@ small {
   border-radius: 5px;
 }
 .entry-panel {
+  grid-column: 2;
+  grid-row: 1;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 15px;
@@ -410,7 +414,7 @@ small {
   justify-content: center;
   gap: 8px;
   flex: 1;
-  min-height: 43px;
+  min-height: 44px;
   border: 0;
   border-radius: 5px;
   background: transparent;
@@ -464,25 +468,6 @@ small {
 }
 .entry-panel > .secondary > svg:last-child {
   margin-left: auto;
-}
-.quick-tip {
-  margin-top: 24px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 17px 14px;
-  background: var(--surface-raised);
-  border-radius: 8px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.quick-tip strong {
-  color: var(--ink);
-  font-size: 12px;
-}
-.tip-icon {
-  color: var(--orange);
-  padding-top: 3px;
 }
 .field-error {
   font-size: 12px;
@@ -816,6 +801,10 @@ small {
   line-height: 1.1;
   margin: 22px 0;
 }
+.lobby-intro {
+  grid-column: 1;
+  grid-row: 1;
+}
 .lobby-intro h1 span {
   color: var(--orange);
 }
@@ -854,6 +843,8 @@ small {
   color: var(--orange);
 }
 .lobby-panel {
+  grid-column: 2;
+  grid-row: 1;
   border: 1px solid var(--border);
   background: var(--surface);
   border-radius: 14px;
@@ -1007,24 +998,29 @@ small {
 .table-area {
   min-width: 0;
 }
+.table-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
 .turn-banner {
   border: 1px solid var(--border);
   border-radius: 8px;
-  min-height: 51px;
-  padding: 12px 16px;
+  min-height: 40px;
+  padding: 9px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
   background: var(--surface);
+  min-width: 0;
 }
 .turn-banner strong {
   font-size: 13px;
   font-weight: 600;
-}
-.turn-banner > span:last-child {
-  margin-left: auto;
-  font-size: 10px;
-  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .your-turn {
   background: var(--purple-soft);
@@ -1034,53 +1030,48 @@ small {
 .your-turn > .live-dot {
   background: var(--purple);
 }
-.table-center {
-  min-height: 229px;
+.deck-count {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 50px;
-  background: radial-gradient(ellipse at center, #bea7ff0d, transparent 70%);
-  padding: 24px 15px;
-}
-.deck-stack {
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 13px;
-  flex-shrink: 0;
-}
-.deck-stack > .playing-card {
-  width: 98px;
-  height: 141px;
-  transform: rotate(-7deg);
-  box-shadow:
-    3px 4px 0 #76618f,
-    5px 7px 0 var(--paper),
-    6px 9px 0 #76618f;
-}
-.deck-stack > span {
-  font-size: 10px;
-  color: var(--muted);
-}
-.deck-stack .card-back .card-value b {
-  font-size: 63px;
-}
-.table-message h2 {
-  font-size: 26px;
-  letter-spacing: -1px;
-  line-height: 1.2;
-  margin: 10px 0;
-  white-space: pre-line;
-}
-.table-message p {
+  gap: 8px;
   font-size: 12px;
   color: var(--muted);
-  white-space: pre-line;
+  padding: 8px 0;
 }
-.table-message > .button,
-.table-message > .pill {
+.deck-count strong {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.deck-label {
+  display: block;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+}
+.deck-low,
+.deck-low strong {
+  color: var(--yellow);
+}
+.round-summary {
+  padding: 20px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.round-summary h2 {
+  font-size: 22px;
+  letter-spacing: -0.6px;
+  margin-bottom: 8px;
+}
+.round-summary p {
+  font-size: 13px;
+  color: var(--muted);
+}
+.round-summary > .button,
+.round-summary > .pill {
   margin-top: 14px;
 }
 .hands-grid {
@@ -1166,12 +1157,14 @@ small {
   border-radius: 10px;
 }
 .modifier-row {
-  min-height: 28px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 5px;
-  margin-top: 4px;
+  margin-block: 10px;
+}
+.modifier-row:empty {
+  display: none;
 }
 .modifier {
   font-size: 10px;
@@ -1194,32 +1187,23 @@ small {
   gap: 7px;
   min-height: 94px;
   flex-wrap: wrap;
+  margin-top: 12px;
+}
+.empty-number-row {
+  min-height: 0;
 }
 .empty-hand {
   width: 100%;
-  height: 94px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  gap: 8px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   background: var(--surface-raised);
   border-radius: 5px;
-  padding: 13px;
-}
-.empty-card {
-  width: 44px;
-  height: 66px;
-  flex-shrink: 0;
-  border: 1px dashed var(--control-border);
-  display: grid;
-  place-items: center;
-  border-radius: 4px;
-  color: var(--purple);
-  font-family: 'Space Grotesk';
-  font-size: 26px;
-  transform: rotate(7deg);
+  padding: 10px;
 }
 .hand-footer {
   display: flex;
@@ -1279,6 +1263,9 @@ small {
   font-size: 12px;
   min-height: 45px;
   padding: 11px 14px;
+}
+.action-hit-short {
+  display: none;
 }
 .game-sidebar > section {
   background: var(--surface);
@@ -1524,10 +1511,6 @@ small {
   .entry-panel label {
     margin-top: 25px;
   }
-  .entry-panel .quick-tip {
-    margin-top: 33px;
-    padding-block: 23px;
-  }
   .how-it-works {
     margin-top: -15px;
   }
@@ -1578,9 +1561,6 @@ small {
   .game-sidebar > section {
     padding: 16px;
   }
-  .table-center {
-    gap: 30px;
-  }
   .lobby {
     gap: 45px;
   }
@@ -1605,7 +1585,7 @@ small {
     padding: 0 24px;
   }
   .site-header {
-    height: 86px;
+    height: 68px;
   }
   .header-actions {
     gap: 17px;
@@ -1616,37 +1596,44 @@ small {
   .home {
     grid-template-columns: 1fr;
     gap: 28px;
-    padding-top: 35px;
+    padding-top: 20px;
+  }
+  .entry-panel,
+  .hero,
+  .lobby-panel,
+  .lobby-intro {
+    grid-column: auto;
+    grid-row: auto;
   }
   .hero {
     min-height: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .hero > .pill,
+  .hero-art {
+    display: none;
   }
   .hero h1 {
-    font-size: 66px;
-    letter-spacing: -3px;
+    font-size: 36px;
+    letter-spacing: -1.5px;
+    margin-top: 0;
+    line-height: 1.15;
   }
-  .hero h1 br:nth-of-type(2) {
+  .hero h1 br {
     display: none;
   }
   .hero h1 > span {
-    margin-left: 12px;
-  }
-  .hero-art {
-    position: absolute;
-    right: 0;
-    top: 200px;
-    transform: scale(0.58);
-    transform-origin: right top;
-    pointer-events: none;
+    display: block;
+    margin-left: 0;
   }
   .hero-description {
-    max-width: 350px;
     font-size: 14px;
+    margin-top: 12px;
   }
   .hero-tags {
-    max-width: 360px;
-    gap: 12px;
-    padding-bottom: 125px;
+    gap: 12px 16px;
+    margin-top: 16px;
   }
   .entry-panel {
     margin-top: 0;
@@ -1660,6 +1647,33 @@ small {
   }
   .entry-panel h2 {
     font-size: 29px;
+    margin-top: 12px;
+  }
+  .entry-heading {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .entry-panel .segmented {
+    margin-top: 20px;
+  }
+  .segmented button {
+    font-size: 14px;
+    min-height: 46px;
+  }
+  .entry-panel label {
+    margin-top: 16px;
+  }
+  .entry-note {
+    font-size: 12px;
+    align-items: flex-start;
+    text-align: center;
+  }
+  .demo-divider {
+    margin: 20px 0 12px;
+    font-size: 10px;
+  }
+  .entry-panel > .secondary {
+    font-size: 14px;
   }
   .how-it-works {
     grid-column: auto;
@@ -1715,44 +1729,102 @@ small {
     overflow: auto;
   }
   .action-bar {
-    bottom: 12px;
+    position: fixed;
+    left: max(24px, env(safe-area-inset-left));
+    right: max(24px, env(safe-area-inset-right));
+    bottom: 0;
+    margin: 0;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 12px 12px 0 0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .action-bar > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .action-bar .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+  .action-bar strong {
+    font-size: 14px;
+    margin-top: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .action-buttons {
+    width: 100%;
+  }
+  .action-buttons .button {
+    flex: 1;
+    min-height: 48px;
+    font-size: 14px;
+    padding: 10px;
+  }
+  .game-page {
+    padding-top: 16px;
+    padding-bottom: calc(var(--action-bar-height, 120px) + 24px);
+  }
+  .game-page ~ .site-footer {
+    display: none;
+  }
+  .game-top {
+    margin-bottom: 14px;
+  }
+  .game-top .eyebrow {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .game-top h1 {
+    margin-top: 4px;
+  }
+  .player-ident h3 {
+    font-size: 15px;
+  }
+  .player-status,
+  .hand-footer {
+    font-size: 12px;
+  }
+  .hand-points span {
+    font-size: 11px;
+  }
+  .you-tag {
+    font-size: 10px;
+  }
+  .player-hand {
+    scroll-margin-block: 16px calc(var(--action-bar-height, 120px) + 16px);
+  }
+  .target-buttons .button {
+    scroll-margin-bottom: calc(var(--action-bar-height, 120px) + 16px);
   }
   .lobby {
     grid-template-columns: 1fr;
     gap: 25px;
-    margin: 35px auto 45px;
+    margin: 20px auto 32px;
+    min-height: 0;
   }
   .lobby-intro h1 {
-    font-size: 45px;
-  }
-  .lobby-intro .lobby-deck {
-    position: absolute;
-    right: 30px;
-    top: 205px;
-    transform: scale(0.55);
-    transform-origin: right top;
-    width: 350px;
-    pointer-events: none;
+    font-size: 32px;
+    letter-spacing: -1px;
+    margin: 12px 0;
   }
   .lobby-intro {
-    position: relative;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
   }
   .lobby-intro .lobby-deck {
-    top: 135px;
-    right: 0;
+    display: none;
   }
   .lobby-intro > .muted {
-    padding-right: 130px;
+    font-size: 14px;
   }
   .lobby-tip {
     margin-top: 22px;
     max-width: 100%;
-  }
-  .lobby-intro .lobby-deck > .playing-card {
-    left: 130px;
-  }
-  .lobby-intro .lobby-deck > .playing-card:nth-child(2) {
-    left: 220px;
   }
   .lobby-panel {
     padding: 25px;
@@ -1763,7 +1835,7 @@ small {
     padding: 0 18px;
   }
   .site-header {
-    height: 77px;
+    height: 64px;
   }
   .brand {
     font-size: 23px;
@@ -1778,58 +1850,36 @@ small {
     gap: 5px;
   }
   .header-actions .text-button {
-    font-size: 11px;
+    font-size: 12px;
     gap: 5px;
   }
   .header-actions .text-button svg {
     width: 16px;
   }
   .hero h1 {
-    font-size: 52px;
-    letter-spacing: -2.8px;
-  }
-  .hero h1 br:nth-of-type(2) {
-    display: block;
-  }
-  .hero h1 > span {
-    margin-left: 0;
-  }
-  .hero .pill {
-    font-size: 8px;
-    padding: 6px 9px;
+    font-size: 30px;
   }
   .hero-description {
-    font-size: 13px;
-    max-width: 285px;
-  }
-  .hero-art {
-    top: 268px;
-    right: -1px;
-    transform: scale(0.5);
+    font-size: 14px;
   }
   .hero-tags {
-    max-width: 205px;
-    padding-bottom: 87px;
-    gap: 11px;
+    gap: 12px;
   }
   .hero-tags > span {
-    font-size: 10px;
-  }
-  .hero-art .art-caption {
-    font-size: 13px;
+    font-size: 12px;
   }
   .home {
-    padding-top: 27px;
-    gap: 18px;
+    padding-top: 16px;
+    gap: 24px;
   }
   .entry-panel {
-    padding: 23px 20px;
+    padding: 20px 18px;
   }
   .entry-panel h2 {
     font-size: 26px;
   }
   .entry-panel > .muted {
-    font-size: 12px;
+    font-size: 13px;
   }
   .how-it-works {
     gap: 12px;
@@ -1860,27 +1910,19 @@ small {
     font-size: 8px;
   }
   .lobby-intro h1 {
-    font-size: 41px;
+    font-size: 30px;
   }
   .lobby-intro > .muted {
-    font-size: 12px;
-    padding-right: 105px;
-  }
-  .lobby-intro .lobby-deck {
-    transform: scale(0.42);
-    top: 145px;
+    font-size: 14px;
   }
   .lobby-panel {
     padding: 20px;
   }
   .lobby-tip {
-    font-size: 11px;
+    font-size: 12px;
   }
   .game-top h1 {
-    font-size: 29px;
-  }
-  .game-top .eyebrow {
-    font-size: 8px;
+    font-size: 26px;
   }
   .game-top > .invite {
     min-width: 0;
@@ -1891,51 +1933,24 @@ small {
     letter-spacing: 2px;
   }
   .game-top .invite .button {
-    font-size: 11px;
+    font-size: 12px;
     padding: 9px;
   }
   .game-top .invite > span {
-    font-size: 8px;
+    font-size: 10px;
   }
   .turn-banner {
-    padding: 11px 12px;
+    padding: 8px 10px;
+    min-height: 36px;
   }
   .turn-banner strong {
     font-size: 12px;
   }
-  .turn-banner > span:last-child {
-    display: none;
+  .table-toolbar {
+    margin-bottom: 12px;
   }
-  .game-page {
-    padding-top: 24px;
-  }
-  .table-center {
-    padding: 23px 5px;
-    gap: 20px;
-    min-height: 215px;
-  }
-  .table-message h2 {
-    font-size: 22px;
-  }
-  .table-message > .eyebrow {
-    font-size: 8px;
-    letter-spacing: 1px;
-  }
-  .table-message p {
-    font-size: 10px;
-  }
-  .deck-stack > .playing-card {
-    width: 82px;
-    height: 120px;
-  }
-  .deck-stack > span {
-    font-size: 8px;
-  }
-  .deck-stack .card-back .card-value b {
-    font-size: 50px;
-  }
-  .deck-stack .card-back .card-value > span {
-    font-size: 15px;
+  .deck-count {
+    padding-block: 0;
   }
   .hands-grid {
     grid-template-columns: 1fr;
@@ -1945,7 +1960,7 @@ small {
     grid-column: auto;
   }
   .player-hand {
-    padding: 13px;
+    padding: 12px;
   }
   .number-row {
     gap: 5px;
@@ -1976,24 +1991,15 @@ small {
   .number-row {
     min-height: 72px;
   }
-  .empty-hand {
-    height: 72px;
+  .empty-number-row {
+    min-height: 0;
   }
   .action-bar {
-    flex-wrap: wrap;
-    padding: 12px;
-    gap: 10px;
-    bottom: 8px;
-  }
-  .action-bar > div:first-child {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 10px;
+    left: max(18px, env(safe-area-inset-left));
+    right: max(18px, env(safe-area-inset-right));
   }
   .action-bar .eyebrow {
-    font-size: 7px;
+    font-size: 10px;
     max-width: 100px;
   }
   .action-bar strong {
@@ -2009,8 +2015,14 @@ small {
   }
   .action-buttons .button {
     flex: 1;
-    min-height: 46px;
+    min-height: 48px;
     font-size: 13px;
+  }
+  .action-hit-label {
+    display: none;
+  }
+  .action-hit-short {
+    display: inline;
   }
   .game-sidebar {
     grid-template-columns: 1fr;
@@ -2025,7 +2037,9 @@ small {
     max-height: 265px;
   }
   .hand-footer {
-    font-size: 9px;
+    font-size: 11px;
+    margin-top: 10px;
+    padding-top: 8px;
   }
   .target-panel {
     padding: 13px;
@@ -2061,70 +2075,6 @@ small {
     scroll-behavior: auto !important;
   }
 }
-@media (max-width: 520px) {
-  .hero-tags {
-    max-width: none;
-    padding-bottom: 0;
-    gap: 13px;
-  }
-  .hero-art {
-    position: relative;
-    top: auto;
-    right: auto;
-    width: 100%;
-    height: 185px;
-    transform: none;
-    margin: 18px 0 0;
-  }
-  .hero-art .fan-card {
-    scale: 0.65;
-    transform-origin: top left;
-  }
-  .hero-art .fan-one {
-    left: 13%;
-    top: 30px;
-  }
-  .hero-art .fan-two {
-    left: 35%;
-    top: 10px;
-  }
-  .hero-art .fan-three {
-    left: 57%;
-    top: 24px;
-  }
-  .hero-art .orbit {
-    width: 94%;
-    height: 120px;
-    top: 32px;
-    left: 0;
-  }
-  .hero-art .orbit-two {
-    width: 80%;
-    height: 105px;
-    left: 10%;
-    top: 35px;
-  }
-  .hero-art .art-spark {
-    font-size: 32px;
-    top: 50px;
-    left: 1%;
-  }
-  .hero-art .spark-two {
-    font-size: 25px;
-    top: 4px;
-    left: 87%;
-  }
-  .hero-art .art-caption {
-    font-size: 9px;
-    bottom: 3px;
-    left: 18%;
-    padding: 5px 8px;
-  }
-  .hero-art .art-caption svg {
-    width: 13px;
-  }
-}
-
 /* Las cartas importadas ya incluyen título, marco e ilustración. */
 .playing-card.full-art {
   height: auto;
