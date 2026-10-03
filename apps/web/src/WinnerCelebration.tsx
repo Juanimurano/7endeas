@@ -1,6 +1,7 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { ArrowRight, Sparkles, Trophy } from 'lucide-react';
 import type { Victory } from './useWinnerCelebration';
+import Modal from './Modal';
 
 const CONFETTI = Array.from(
   { length: 32 },
@@ -25,26 +26,12 @@ export default function WinnerCelebration({
   mine: boolean;
   onDismiss: () => void;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = ref.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
-  function dismiss() {
-    ref.current?.close();
-    onDismiss();
-  }
   return (
-    <dialog
-      ref={ref}
+    <Modal
       className="victory-dialog"
-      aria-labelledby="victory-title"
-      aria-describedby="victory-description"
-      onCancel={(event) => {
-        event.preventDefault();
-        dismiss();
-      }}
+      labelledBy="victory-title"
+      describedBy="victory-description"
+      onDismiss={onDismiss}
     >
       <div className="victory-confetti" aria-hidden="true">
         {CONFETTI.map((style, index) => (
@@ -76,10 +63,10 @@ export default function WinnerCelebration({
         <p className="victory-rounds">
           {victory.rounds} {victory.rounds === 1 ? 'ronda' : 'rondas'} de buenas endeas.
         </p>
-        <button className="button primary wide" onClick={dismiss} autoFocus>
+        <button className="button primary wide" onClick={onDismiss} data-autofocus>
           Ver resultados <ArrowRight size={18} />
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

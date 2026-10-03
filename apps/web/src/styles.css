@@ -1448,13 +1448,8 @@ small {
   background: var(--surface);
   color: var(--ink);
   padding: 35px;
-  width: min(600px, calc(100% - 28px));
-  max-height: calc(100dvh - 40px);
+  width: min(600px, 100%);
   box-shadow: 0 20px 100px var(--shadow);
-}
-.rules-dialog::backdrop {
-  background: #07050dbb;
-  backdrop-filter: blur(4px);
 }
 .close-dialog {
   position: absolute;
@@ -2162,9 +2157,8 @@ small {
 .card-reveal-dialog {
   --reveal-accent: var(--purple);
   --reveal-glow: #bea7ff26;
-  width: min(740px, calc(100% - 28px));
-  max-height: calc(100dvh - 28px);
-  margin: auto;
+  width: min(740px, 100%);
+  margin: 0;
   padding: 32px;
   border: 1px solid var(--accent-border);
   border-radius: 18px;
@@ -2173,16 +2167,12 @@ small {
   box-shadow: 0 24px 100px #00000080;
   overflow: auto;
 }
-.card-reveal-dialog[open] {
+.card-reveal-dialog {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
   align-items: center;
   gap: 32px;
   animation: reveal-appear 220ms ease-out both;
-}
-.card-reveal-dialog::backdrop {
-  background: #07050de6;
-  backdrop-filter: blur(7px);
 }
 .reveal-freeze {
   --reveal-accent: #9adfe6;
@@ -2205,6 +2195,7 @@ small {
 }
 .reveal-card {
   width: 190px;
+  height: 285px;
   aspect-ratio: 2 / 3;
   filter: drop-shadow(0 12px 18px #00000066);
 }
@@ -2289,7 +2280,7 @@ small {
   .card-reveal-dialog {
     padding: 24px;
   }
-  .card-reveal-dialog[open] {
+  .card-reveal-dialog {
     grid-template-columns: 1fr;
     gap: 16px;
   }
@@ -2298,6 +2289,7 @@ small {
   }
   .reveal-card {
     width: 146px;
+    height: 219px;
   }
   .reveal-copy h2 {
     font-size: 28px;
@@ -2316,12 +2308,13 @@ small {
   .card-reveal-dialog {
     padding: 22px;
   }
-  .card-reveal-dialog[open] {
+  .card-reveal-dialog {
     grid-template-columns: 150px minmax(0, 1fr);
     gap: 22px;
   }
   .reveal-card {
     width: 130px;
+    height: 195px;
   }
   .reveal-copy h2 {
     font-size: 26px;
@@ -2334,10 +2327,9 @@ small {
 
 /* Celebración del resultado final, compartida por todos los jugadores. */
 .victory-dialog {
-  width: min(540px, calc(100% - 28px));
-  max-height: calc(100dvh - 28px);
+  width: min(540px, 100%);
   padding: 34px;
-  margin: auto;
+  margin: 0;
   border: 1px solid #ad8c4d;
   border-radius: 20px;
   background: radial-gradient(ellipse at top, #f7c95b12, transparent 65%), var(--surface);
@@ -2346,12 +2338,8 @@ small {
   overflow: auto;
   box-shadow: 0 25px 100px #00000088;
 }
-.victory-dialog[open] {
+.victory-dialog {
   animation: victory-appear 350ms ease-out both;
-}
-.victory-dialog::backdrop {
-  background: radial-gradient(ellipse at center, #f7c95b0d, transparent 65%), #07050de6;
-  backdrop-filter: blur(7px);
 }
 .victory-content {
   position: relative;
@@ -2520,9 +2508,8 @@ small {
 
 /* Resumen corto entre rondas; el servidor controla la cuenta regresiva. */
 .round-recap-dialog {
-  width: min(640px, calc(100% - 28px));
-  max-height: calc(100dvh - 28px);
-  margin: auto;
+  width: min(640px, 100%);
+  margin: 0;
   padding: 28px;
   border: 1px solid var(--accent-border);
   border-radius: 16px;
@@ -2530,12 +2517,8 @@ small {
   color: var(--ink);
   box-shadow: 0 20px 100px #00000080;
 }
-.round-recap-dialog[open] {
+.round-recap-dialog {
   animation: reveal-appear 220ms ease-out both;
-}
-.round-recap-dialog::backdrop {
-  background: #07050dde;
-  backdrop-filter: blur(6px);
 }
 .recap-heading {
   display: flex;
@@ -2568,7 +2551,8 @@ small {
   margin-bottom: 20px;
 }
 .recap-table-scroll {
-  max-height: calc(100dvh - 280px);
+  max-height: calc(100vh - 280px);
+  max-height: max(100px, calc(var(--modal-height, 100vh) - 280px));
   overflow: auto;
 }
 .recap-table {
@@ -2712,4 +2696,46 @@ small {
   .recap-countdown {
     font-size: 11px;
   }
+}
+
+/* Capa común de modales: viewport visible, portal a body y scroll interno en iOS. */
+.modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 14px;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  isolation: isolate;
+  overflow: hidden;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #07050de6;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modal-surface {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  max-height: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-surface:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: -2px;
 }

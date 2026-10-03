@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { cardLabel } from '../../../packages/engine/src/index';
 import Card from './Card';
 import type { CardReveal } from './useSpecialCardReveals';
+import Modal from './Modal';
 
 export default function CardRevealDialog({
   reveal,
@@ -13,26 +13,12 @@ export default function CardRevealDialog({
   count: number;
   onDismiss: () => void;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = ref.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
-  function dismiss() {
-    ref.current?.close();
-    onDismiss();
-  }
   return (
-    <dialog
-      ref={ref}
+    <Modal
       className={`card-reveal-dialog reveal-${reveal.event.card.kind}`}
-      aria-labelledby="reveal-title"
-      aria-describedby="reveal-description"
-      onCancel={(event) => {
-        event.preventDefault();
-        dismiss();
-      }}
+      labelledBy="reveal-title"
+      describedBy="reveal-description"
+      onDismiss={onDismiss}
     >
       <div className="reveal-art" aria-hidden="true">
         <div className="reveal-card">
@@ -58,10 +44,10 @@ export default function CardRevealDialog({
             Después de esta hay {count - 1} {count === 2 ? 'aviso más' : 'avisos más'}.
           </p>
         )}
-        <button className="button primary wide" onClick={dismiss} autoFocus>
+        <button className="button primary wide" onClick={onDismiss} data-autofocus>
           Entendido <ArrowRight size={18} />
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

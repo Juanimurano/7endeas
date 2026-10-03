@@ -36,6 +36,7 @@ import WinnerCelebration from './WinnerCelebration';
 import { useWinnerCelebration } from './useWinnerCelebration';
 import RoundRecapDialog from './RoundRecapDialog';
 import { useRoundRecapReady } from './useRoundRecapReady';
+import Modal from './Modal';
 import { useGame } from './useGame';
 
 type Connection = ReturnType<typeof useGame>;
@@ -58,29 +59,22 @@ function Brand() {
   );
 }
 
-function Rules({ close }: { close: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    ref.current?.showModal();
-  }, []);
-  function dismiss() {
-    ref.current?.close();
-    close();
-  }
+function Rules({
+  close,
+  returnFocusTo,
+}: {
+  close: () => void;
+  returnFocusTo?: HTMLElement | null;
+}) {
   return (
-    <dialog
+    <Modal
       className="rules-dialog"
-      ref={ref}
-      onCancel={(event) => {
-        event.preventDefault();
-        dismiss();
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) dismiss();
-      }}
-      aria-labelledby="rules-title"
+      labelledBy="rules-title"
+      onDismiss={close}
+      dismissOnBackdrop
+      returnFocusTo={returnFocusTo}
     >
-      <button className="icon-button close-dialog" onClick={dismiss} aria-label="Cerrar reglas">
+      <button className="icon-button close-dialog" onClick={close} aria-label="Cerrar reglas">
         <X />
       </button>
       <p className="eyebrow">UN MINUTO Y A JUGAR</p>
@@ -145,10 +139,10 @@ function Rules({ close }: { close: () => void }) {
         Al agotarse el mazo se mezclan solo los descartes de rondas anteriores. Gana el total más
         alto al terminar una ronda con 200 o más; si empatan, todos juegan otra ronda.
       </p>
-      <button className="button primary wide" onClick={dismiss}>
+      <button className="button primary wide" onClick={close}>
         Listo, vamos a jugar <ArrowRight size={18} />
       </button>
-    </dialog>
+    </Modal>
   );
 }
 
@@ -809,6 +803,7 @@ function Game({ connection }: { connection: Connection }) {
 export default function App() {
   const connection = useGame();
   const [rules, setRules] = useState(false);
+  const rulesTrigger = useRef<HTMLButtonElement>(null);
   const [art, setArt] = useState<Record<string, string>>({});
   const [printedFaces, setPrintedFaces] = useState<string[]>([]);
   const { reveal, count, dismiss, settled } = useSpecialCardReveals(
@@ -820,8 +815,8 @@ export default function App() {
   useRoundRecapReady(room, connection.socket, connected, settled && !reveal && !rules);
   const showRecap = room?.game?.phase === 'roundEnd' && !!room.roundRecap?.nextRoundAt;
   useEffect(() => {
-    if (room?.roundRecap?.nextRoundAt != null) setRules(false);
-  }, [room?.roundRecap?.nextRoundAt]);
+    if (room?.roundRecap?.nextRoundAt != null || reveal || victory) setRules(false);
+  }, [room?.roundRecap?.nextRoundAt, reveal?.event.id, victory?.key]);
   useEffect(() => {
     const controller = new AbortController();
     fetch('/cards/manifest.json', { signal: controller.signal })
@@ -859,7 +854,11 @@ export default function App() {
                   </>
                 )}
               </span>
-              <button className="button text-button" onClick={() => setRules(true)}>
+              <button
+                ref={rulesTrigger}
+                className="button text-button"
+                onClick={() => setRules(true)}
+              >
                 <HelpCircle size={18} /> Cómo jugar
               </button>
               {room && (
@@ -911,7 +910,9 @@ export default function App() {
             </span>
           </footer>
         </div>
-        {rules && !showRecap && <Rules close={() => setRules(false)} />}
+        {rules && !showRecap && (
+          <Rules close={() => setRules(false)} returnFocusTo={rulesTrigger.current} />
+        )}
         {reveal && !showRecap && (
           <CardRevealDialog
             key={`${room?.code}-${reveal.event.id}`}

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarChart3, Check, Clock3 } from 'lucide-react';
 import type { GameView } from '../../../packages/engine/src/index';
 import type { RoundRecap } from '../../../packages/protocol/src/index';
+import Modal from './Modal';
 
 export default function RoundRecapDialog({
   game,
@@ -16,15 +17,9 @@ export default function RoundRecapDialog({
   playerId?: string;
   connected: boolean;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
   const [remaining, setRemaining] = useState(() =>
     recap.nextRoundAt === null ? recap.durationMs : Math.max(0, recap.nextRoundAt - serverTime),
   );
-  useEffect(() => {
-    const dialog = ref.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
   useEffect(() => {
     if (recap.nextRoundAt === null) {
       setRemaining(recap.durationMs);
@@ -53,13 +48,7 @@ export default function RoundRecapDialog({
           ? `Celebramos al ganador en ${seconds} s`
           : `La próxima ronda empieza en ${seconds} s`;
   return (
-    <dialog
-      ref={ref}
-      className="round-recap-dialog"
-      aria-labelledby="recap-title"
-      aria-describedby="recap-caption"
-      onCancel={(event) => event.preventDefault()}
-    >
+    <Modal className="round-recap-dialog" labelledBy="recap-title" describedBy="recap-caption">
       <div className="recap-heading">
         <span className="recap-icon" aria-hidden="true">
           <BarChart3 size={25} />
@@ -124,6 +113,6 @@ export default function RoundRecapDialog({
           aria-label="Tiempo del resumen de puntos"
         />
       </div>
-    </dialog>
+    </Modal>
   );
 }

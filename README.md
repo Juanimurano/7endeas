@@ -51,6 +51,7 @@ El servidor corre en `8086`; Vite en `5186`, con proxy de `/socket.io`. Para pro
 - Bots automáticos, ranking y registro de acciones.
 - Reconexión con token de sesión guardado por pestaña, con respaldo en el navegador para recuperar el asiento si el teléfono descarta la pestaña. Si un jugador sigue desconectado cuando le toca actuar, después de 45 segundos se planta; si debía elegir objetivo, se resuelve automáticamente.
 - Interfaz responsive, navegación por teclado y reglas dentro de la app.
+- Modales portaleados a una capa fija y ajustados al viewport visible, incluidos iPhone/Safari y Chrome en iOS. Bloquean el scroll del fondo, permiten scroll interno y restauran el foco al cerrarse; no requieren la API nativa de `<dialog>`.
 
 ## Arte de las cartas especiales
 
@@ -85,7 +86,13 @@ Al cerrar la ronda hay hasta 3 segundos de margen para los últimos avisos; cuan
 Antes de la primera ejecución de los tests de navegador:
 
 ```bash
-npx playwright install chromium
+npx playwright install chromium webkit
+```
+
+Para ejecutar únicamente las pruebas de iPhone con WebKit:
+
+```bash
+npm run test:e2e -- --project=iphone-webkit
 ```
 
 Ejecutá `npm run build` antes de `npm run test:e2e`: las pruebas de cartas especiales usan el frontend compilado con un servidor aislado y mazos controlados, sin endpoints de prueba en producción.

@@ -22,16 +22,21 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
     .poll(
       async () => {
         await dismissReveals(page);
+        if (await page.locator('.round-recap-dialog').isVisible()) return true;
+        const hit = page.getByRole('button', { name: '¡Una endea más!' });
         return (
-          (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) ||
-          (await page.locator('.target-buttons button').first().isVisible()) ||
-          (await page.locator('.round-recap-dialog').isVisible())
+          ((await hit.count()) > 0 && (await hit.isEnabled())) ||
+          (await page.locator('.target-buttons button').first().isVisible())
         );
       },
       { timeout: 20000 },
     )
     .toBe(true);
-  if (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled()) {
+  if (
+    !(await page.locator('.round-recap-dialog').isVisible()) &&
+    (await page.getByRole('button', { name: '¡Una endea más!' }).count()) &&
+    (await page.getByRole('button', { name: '¡Una endea más!' }).isEnabled())
+  ) {
     await page.getByRole('button', { name: '¡Una endea más!' }).click();
   }
   // El primer robo puede ser una acción: elegimos un objetivo si corresponde.
@@ -41,7 +46,7 @@ test('inicio, reglas, demo, una ronda y reconexión', async ({ page }, testInfo)
     if (await target.isVisible()) await target.click();
     if (await page.locator('.round-recap-dialog').isVisible()) break;
     const stand = page.getByRole('button', { name: 'Me planto' });
-    if (await stand.isEnabled()) await stand.click();
+    if ((await stand.count()) && (await stand.isEnabled())) await stand.click();
     await page.waitForTimeout(500);
   }
   await awaitRoundRecap(page);

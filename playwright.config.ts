@@ -22,6 +22,14 @@ export default defineConfig({
         defaultBrowserType: 'chromium',
       },
     },
+    {
+      name: 'iphone-webkit',
+      use: {
+        ...devices['iPhone 13'],
+        viewport: { width: 375, height: 812 },
+        browserName: 'webkit',
+      },
+    },
   ],
   webServer: {
     command: production ? 'npm start' : 'npm run dev',
